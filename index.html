@@ -181,6 +181,7 @@
         <option value="">– Vælg afdeling –</option>
         <option value="east.transport.dk@godik.dk">Hedehusene (east.transport)</option>
         <option value="north.transport.dk@godik.dk">Brovst (north.transport)</option>
+        <option value="chaplyhina.anastasiia@gmail.com">Test (gmail)</option>
       </select>
       <div class="field-err" id="aerr-dept">Vælg en afdeling</div>
     </div>
@@ -216,7 +217,7 @@ function saveAll(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
 function uid()     { return 'R' + Date.now().toString(36).toUpperCase(); }
 function todayISO(){ return new Date().toISOString().split('T')[0]; }
 function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; }
-function deptName(email){ return email.includes('east') ? 'Hedehusene' : 'Brovst'; }
+function deptName(email){ return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
 
 // Toast
 let _tt;
