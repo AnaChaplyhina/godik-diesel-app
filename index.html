@@ -134,9 +134,8 @@
       <div class="field-err" id="ferr-unit">Angiv generator- eller tanknummer</div>
     </div>
     <div class="field">
-      <label>Bookingnr.<span class="req">*</span></label>
+      <label>Bookingnr.<span class="hint">valgfri</span></label>
       <input type="text" id="f-booking" placeholder="fx 245420" autocomplete="off">
-      <div class="field-err" id="ferr-booking">Angiv bookingnummer</div>
     </div>
     <div class="field">
       <label>Dato<span class="req">*</span></label>
@@ -258,9 +257,8 @@ function chk(id, errId, fn){
 // ── SUBMIT FORM ──
 function submitForm(){
   const ok1=chk('f-unit',   'ferr-unit',    v=>v.trim().length>0);
-  const ok2=chk('f-booking','ferr-booking', v=>v.trim().length>0);
   const ok3=chk('f-used',   'ferr-used',    v=>v!==''&&parseFloat(v)>=0);
-  if(!ok1||!ok2||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
+  if(!ok1||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
 
   const unit    = document.getElementById('f-unit').value.trim();
   const booking = document.getElementById('f-booking').value.trim();
