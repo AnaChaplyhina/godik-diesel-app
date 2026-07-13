@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Diesel Registrering – Godik</title>
+<style>
+  :root {
+    --ink:       #0D1B2A;
+    --steel:     #1C3A52;
+    --mid:       #4A6580;
+    --mist:      #C8D8E4;
+    --fog:       #EEF3F7;
+    --page:      #F5F8FA;
+    --white:     #FFFFFF;
+    --fuel:      #E8760A;
+    --fuel-dim:  #C4620A;
+    --ok:        #1A7A4A;
+    --err:       #B83232;
+    --err-light: #FDEAEA;
+    --r-card: 14px; --r-input: 10px; --r-btn: 10px;
+    --shadow-card: 0 2px 16px rgba(13,27,42,0.10);
+    --shadow-btn:  0 2px 8px rgba(232,118,10,0.30);
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--page); color: var(--ink); min-height: 100dvh; padding-bottom: 40px; }
+
+  .site-header { background: var(--steel); padding: 18px 20px 16px; display: flex; align-items: center; gap: 12px; }
+  .fuel-icon { width: 36px; height: 36px; background: var(--fuel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .site-header h1 { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+  .site-header p { color: var(--mist); font-size: 12px; margin-top: 2px; }
+
+  .tabs { display: flex; background: var(--steel); padding: 0 16px; gap: 4px; }
+  .tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 13px; font-weight: 600; color: var(--mist); cursor: pointer; border-bottom: 3px solid transparent; transition: color .15s, border-color .15s; user-select: none; }
+  .tab.active { color: var(--white); border-bottom-color: var(--fuel); }
+
+  .view { display: none; padding: 20px 16px 0; }
+  .view.active { display: block; }
+
+  .card { background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 16px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--steel); margin-bottom: 6px; }
+  label .required { color: var(--fuel); margin-left: 2px; }
+  label .hint { font-weight: 400; color: var(--mid); font-size: 12px; margin-left: 4px; }
+
+  input[type="text"], input[type="number"], input[type="date"] {
+    width: 100%; padding: 13px 14px; border: 1.5px solid var(--mist); border-radius: var(--r-input);
+    font-size: 16px; font-family: var(--font); color: var(--ink); background: var(--fog);
+    transition: border-color .15s, background .15s; -webkit-appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--fuel); background: var(--white); }
+  input.error { border-color: var(--err); background: var(--err-light); }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .btn-submit { width: 100%; padding: 16px; background: var(--fuel); color: var(--white); border: none; border-radius: var(--r-btn); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-btn); transition: background .15s, transform .1s; margin-top: 4px; }
+  .btn-submit:active { background: var(--fuel-dim); transform: scale(.98); }
+
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ok); color: var(--white); padding: 14px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.2); transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; z-index: 999; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.err { background: var(--err); }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+  .filter-bar input { flex: 1; padding: 10px 12px; font-size: 14px; }
+  .btn-export { padding: 10px 14px; background: var(--steel); color: var(--white); border: none; border-radius: var(--r-btn); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+  .record-count { font-size: 12px; color: var(--mid); margin-bottom: 10px; }
+  .record-card { background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card); padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid var(--fuel); }
+  .record-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .record-id { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .5px; }
+  .record-date { font-size: 12px; color: var(--mid); }
+  .record-booking { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .record-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .tag-gen  { background: var(--fog); color: var(--steel); }
+  .tag-used { background: #FFF3E6; color: var(--fuel-dim); }
+  .tag-rest { background: var(--fog); color: var(--mid); }
+  .record-actions { margin-top: 10px; display: flex; justify-content: flex-end; }
+  .btn-delete { padding: 4px 10px; background: none; border: 1px solid var(--mist); border-radius: 6px; font-size: 12px; color: var(--mid); cursor: pointer; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-box { background: var(--white); border-radius: 12px; padding: 14px; box-shadow: var(--shadow-card); text-align: center; }
+  .stat-value { font-size: 26px; font-weight: 800; color: var(--fuel); letter-spacing: -1px; }
+  .stat-label { font-size: 11px; color: var(--mid); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+  .field-error { font-size: 12px; color: var(--err); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--mid); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="fuel-icon">⛽</div>
+  <div>
+    <h1>Diesel Registrering</h1>
+    <p>Godik – Generatorservice</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tab active" onclick="switchTab('form')">Registrer</div>
+  <div class="tab" onclick="switchTab('records')">Oversigt</div>
+</nav>
+
+<div class="view active" id="view-form">
+  <div class="card">
+    <div class="card-title">Udfyld oplysninger</div>
+
+    <div class="field">
+      <label>Generator / Tank nr.<span class="required">*</span></label>
+      <input type="text" id="f-unit" placeholder="fx G-104 eller DT-22" autocomplete="off">
+      <div class="field-error" id="err-unit">Angiv generator- eller tanknummer</div>
+    </div>
+
+    <div class="field">
+      <label>Bookingnr.<span class="required">*</span></label>
+      <input type="text" id="f-booking" placeholder="fx B-2026-4471" autocomplete="off">
+      <div class="field-error" id="err-booking">Angiv bookingnummer</div>
+    </div>
+
+    <div class="field">
+      <label>Dato<span class="required">*</span></label>
+      <input type="date" id="f-date">
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label>Brugt<span class="required">*</span><span class="hint">liter</span></label>
+        <input type="number" id="f-used" placeholder="0" min="0" step="0.1">
+        <div class="field-error" id="err-used">Angiv antal liter</div>
+      </div>
+      <div class="field">
+        <label>Rest i bak<span class="hint">liter</span></label>
+        <input type="number" id="f-rest" placeholder="0" min="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Bemærkning<span class="hint">valgfri</span></label>
+      <input type="text" id="f-note" placeholder="fx lækage, ekstra påfyldning...">
+    </div>
+
+    <button class="btn-submit" onclick="submitForm()">Gem registrering</button>
+  </div>
+</div>
+
+<div class="view" id="view-records">
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="filter-bar">
+    <input type="text" id="search" placeholder="Søg booking, generator..." oninput="renderRecords()">
+    <button class="btn-export" onclick="exportCSV()">CSV ↓</button>
+  </div>
+  <div class="record-count" id="record-count"></div>
+  <div id="records-list"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const KEY = 'godik_diesel_records';
+function getRecords() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function saveRecords(a) { localStorage.setItem(KEY, JSON.stringify(a)); }
+function genId() { return 'R' + Date.now().toString(36).toUpperCase(); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { if (!d) return '–'; const [y,m,day] = d.split('-'); return `${day}.${m}.${y}`; }
+
+let toastTimer;
+function showToast(msg, isErr=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = isErr ? 'err show' : 'show';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className='', 3000);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&name==='form')||(i===1&&name==='records')));
+  document.getElementById('view-form').classList.toggle('active', name==='form');
+  document.getElementById('view-records').classList.toggle('active', name==='records');
+  if (name==='records') renderRecords();
+}
+
+document.getElementById('f-date').value = today();
+
+function validate(id, errId, check) {
+  const el = document.getElementById(id), err = errId ? document.getElementById(errId) : null;
+  const ok = check(el.value);
+  el.classList.toggle('error', !ok);
+  if (err) err.classList.toggle('show', !ok);
+  return ok;
+}
+
+function submitForm() {
+  const ok1 = validate('f-unit',    'err-unit',    v => v.trim().length > 0);
+  const ok2 = validate('f-booking', 'err-booking', v => v.trim().length > 0);
+  const ok3 = validate('f-used',    'err-used',    v => v !== '' && parseFloat(v) >= 0);
+  if (!ok1||!ok2||!ok3) { showToast('Udfyld de påkrævede felter', true); return; }
+
+  const r = {
+    id:      genId(),
+    ts:      new Date().toISOString(),
+    unit:    document.getElementById('f-unit').value.trim(),
+    booking: document.getElementById('f-booking').value.trim(),
+    date:    document.getElementById('f-date').value || today(),
+    used:    parseFloat(document.getElementById('f-used').value) || 0,
+    rest:    parseFloat(document.getElementById('f-rest').value) || 0,
+    note:    document.getElementById('f-note').value.trim(),
+  };
+
+  const records = getRecords(); records.unshift(r); saveRecords(records);
+
+  ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id => {
+    const el = document.getElementById(id); el.value=''; el.classList.remove('error');
+  });
+  document.getElementById('f-date').value = today();
+  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+  showToast('✓ Registrering gemt');
+}
+
+function renderRecords() {
+  const records = getRecords();
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  const filtered = records.filter(r => !q || r.booking.toLowerCase().includes(q) || r.unit.toLowerCase().includes(q) || (r.note&&r.note.toLowerCase().includes(q)));
+
+  const totalUsed = records.reduce((s,r) => s+(r.used||0), 0);
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-value">${records.length}</div><div class="stat-label">Registreringer</div></div>
+    <div class="stat-box"><div class="stat-value">${totalUsed.toFixed(0)}</div><div class="stat-label">Liter i alt</div></div>`;
+
+  document.getElementById('record-count').textContent =
+    filtered.length===records.length ? `${records.length} registrering${records.length!==1?'er':''}` : `Viser ${filtered.length} af ${records.length}`;
+
+  const list = document.getElementById('records-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>${!records.length?'Ingen registreringer endnu.':'Ingen resultater.'}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(r => `
+    <div class="record-card">
+      <div class="record-top"><div class="record-id">${r.id}</div><div class="record-date">${fmtDate(r.date)}</div></div>
+      <div class="record-booking">Booking: ${r.booking}</div>
+      <div class="record-tags">
+        <span class="tag tag-gen">⚙️ ${r.unit}</span>
+        <span class="tag tag-used">⛽ ${r.used} L brugt</span>
+        ${r.rest>0?`<span class="tag tag-rest">🪣 ${r.rest} L rest</span>`:''}
+        ${r.note?`<span class="tag tag-gen">💬 ${r.note}</span>`:''}
+      </div>
+      <div class="record-actions"><button class="btn-delete" onclick="deleteRecord('${r.id}')">Slet</button></div>
+    </div>`).join('');
+}
+
+function deleteRecord(id) { saveRecords(getRecords().filter(r=>r.id!==id)); renderRecords(); showToast('Slettet'); }
+
+function exportCSV() {
+  const records = getRecords();
+  if (!records.length) { showToast('Ingen data', true); return; }
+  const hdr = ['ID','Dato','Generator/Tank','Booking','Brugt (L)','Rest (L)','Bemærkning','Tidsstempel'];
+  const rows = records.map(r => [r.id,fmtDate(r.date),r.unit,r.booking,r.used,r.rest,r.note||'',r.ts]);
+  const csv = [hdr,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = `godik_diesel_${today()}.csv`; a.click();
+  showToast('CSV downloadet');
+}
+</script>
+</body>
+</html>
