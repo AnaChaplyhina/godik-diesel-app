@@ -6,92 +6,105 @@
 <title>Diesel Registrering – Godik</title>
 <style>
   :root {
-    --ink:       #0D1B2A;
-    --steel:     #1C3A52;
-    --mid:       #4A6580;
-    --mist:      #C8D8E4;
-    --fog:       #EEF3F7;
-    --page:      #F5F8FA;
-    --white:     #FFFFFF;
-    --fuel:      #E8760A;
-    --fuel-dim:  #C4620A;
-    --ok:        #1A7A4A;
-    --err:       #B83232;
-    --err-light: #FDEAEA;
-    --r-card: 14px; --r-input: 10px; --r-btn: 10px;
-    --shadow-card: 0 2px 16px rgba(13,27,42,0.10);
-    --shadow-btn:  0 2px 8px rgba(232,118,10,0.30);
+    --ink:      #0D1B2A;
+    --steel:    #1C3A52;
+    --mid:      #4A6580;
+    --mist:     #C8D8E4;
+    --fog:      #EEF3F7;
+    --page:     #F5F8FA;
+    --white:    #FFFFFF;
+    --fuel:     #E8760A;
+    --fuel-dim: #C4620A;
+    --ok:       #1A7A4A;
+    --ok-bg:    #D4F0E0;
+    --wait:     #1C3A52;
+    --wait-bg:  #DDE8F0;
+    --err:      #B83232;
+    --err-bg:   #FDEAEA;
+    --r: 12px;
+    --shadow: 0 2px 14px rgba(13,27,42,0.09);
     --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--page); color: var(--ink); min-height: 100dvh; padding-bottom: 40px; }
+  body { font-family: var(--font); background: var(--page); color: var(--ink); min-height: 100dvh; padding-bottom: 48px; }
 
-  .site-header { background: var(--steel); padding: 18px 20px 16px; display: flex; align-items: center; gap: 12px; }
+  /* HEADER */
+  .site-header { background: var(--steel); padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
   .fuel-icon { width: 36px; height: 36px; background: var(--fuel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .site-header h1 { color: var(--white); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+  .site-header h1 { color: var(--white); font-size: 18px; font-weight: 700; line-height: 1.2; }
   .site-header p { color: var(--mist); font-size: 12px; margin-top: 2px; }
 
-  .tabs { display: flex; background: var(--steel); padding: 0 16px; gap: 4px; }
+  /* TABS */
+  .tabs { display: flex; background: var(--steel); padding: 0 16px; }
   .tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 13px; font-weight: 600; color: var(--mist); cursor: pointer; border-bottom: 3px solid transparent; transition: color .15s, border-color .15s; user-select: none; }
   .tab.active { color: var(--white); border-bottom-color: var(--fuel); }
 
-  .view { display: none; padding: 20px 16px 0; }
+  /* VIEWS */
+  .view { display: none; padding: 16px; }
   .view.active { display: block; }
 
-  .card { background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 20px; margin-bottom: 16px; }
-  .card-title { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 16px; }
+  /* CARD */
+  .card { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 14px; }
 
-  .field { margin-bottom: 16px; }
+  /* FIELDS */
+  .field { margin-bottom: 14px; }
   .field:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 13px; font-weight: 600; color: var(--steel); margin-bottom: 6px; }
-  label .required { color: var(--fuel); margin-left: 2px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--steel); margin-bottom: 5px; }
+  label .req { color: var(--fuel); }
   label .hint { font-weight: 400; color: var(--mid); font-size: 12px; margin-left: 4px; }
-
-  input[type="text"], input[type="number"], input[type="date"] {
-    width: 100%; padding: 13px 14px; border: 1.5px solid var(--mist); border-radius: var(--r-input);
+  input[type="text"], input[type="number"], input[type="date"], select {
+    width: 100%; padding: 12px 13px; border: 1.5px solid var(--mist); border-radius: 9px;
     font-size: 16px; font-family: var(--font); color: var(--ink); background: var(--fog);
-    transition: border-color .15s, background .15s; -webkit-appearance: none;
+    transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none;
   }
-  input:focus { outline: none; border-color: var(--fuel); background: var(--white); }
-  input.error { border-color: var(--err); background: var(--err-light); }
+  input:focus, select:focus { outline: none; border-color: var(--fuel); background: var(--white); }
+  input.err { border-color: var(--err); background: var(--err-bg); }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-err { font-size: 12px; color: var(--err); margin-top: 4px; display: none; }
+  .field-err.show { display: block; }
 
-  .btn-submit { width: 100%; padding: 16px; background: var(--fuel); color: var(--white); border: none; border-radius: var(--r-btn); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-btn); transition: background .15s, transform .1s; margin-top: 4px; }
-  .btn-submit:active { background: var(--fuel-dim); transform: scale(.98); }
+  /* BUTTONS */
+  .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; margin-top: 4px; }
+  .btn:active { opacity: .85; transform: scale(.98); }
+  .btn-primary { background: var(--fuel); color: var(--white); box-shadow: 0 2px 8px rgba(232,118,10,.28); }
+  .btn-anmod { background: var(--steel); color: var(--white); }
 
-  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ok); color: var(--white); padding: 14px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.2); transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; z-index: 999; }
+  /* TOAST */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ok); color: var(--white); padding: 13px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.18); transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; z-index: 999; pointer-events: none; }
   #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.err { background: var(--err); }
+  #toast.t-err { background: var(--err); }
 
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; }
-  .filter-bar input { flex: 1; padding: 10px 12px; font-size: 14px; }
-  .btn-export { padding: 10px 14px; background: var(--steel); color: var(--white); border: none; border-radius: var(--r-btn); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  /* OVERSIGT */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .7px; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .badge-wait { background: var(--wait-bg); color: var(--wait); }
+  .badge-done { background: var(--ok-bg); color: var(--ok); }
 
-  .record-count { font-size: 12px; color: var(--mid); margin-bottom: 10px; }
-  .record-card { background: var(--white); border-radius: 12px; box-shadow: var(--shadow-card); padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid var(--fuel); }
-  .record-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-  .record-id { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: .5px; }
-  .record-date { font-size: 12px; color: var(--mid); }
-  .record-booking { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
-  .record-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-  .tag-gen  { background: var(--fog); color: var(--steel); }
-  .tag-used { background: #FFF3E6; color: var(--fuel-dim); }
-  .tag-rest { background: var(--fog); color: var(--mid); }
-  .record-actions { margin-top: 10px; display: flex; justify-content: flex-end; }
-  .btn-delete { padding: 4px 10px; background: none; border: 1px solid var(--mist); border-radius: 6px; font-size: 12px; color: var(--mid); cursor: pointer; }
+  .search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .search-bar input { flex: 1; padding: 10px 12px; font-size: 14px; }
+  .btn-csv { padding: 10px 13px; background: var(--steel); color: var(--white); border: none; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .stat-box { background: var(--white); border-radius: 12px; padding: 14px; box-shadow: var(--shadow-card); text-align: center; }
-  .stat-value { font-size: 26px; font-weight: 800; color: var(--fuel); letter-spacing: -1px; }
-  .stat-label { font-size: 11px; color: var(--mid); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  /* RECORD CARD */
+  .rec { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow); padding: 13px 15px; margin-bottom: 9px; border-left: 4px solid var(--mist); }
+  .rec.waiting { border-left-color: var(--steel); }
+  .rec.done    { border-left-color: var(--ok); }
+  .rec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .rec-booking { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .status-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+  .pill-wait { background: var(--wait-bg); color: var(--wait); }
+  .pill-done { background: var(--ok-bg); color: var(--ok); }
+  .rec-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--fog); color: var(--steel); }
+  .tag-fuel { background: #FFF3E6; color: var(--fuel-dim); }
+  .tag-dept { background: var(--wait-bg); color: var(--wait); }
+  .rec-meta { font-size: 11px; color: var(--mid); margin-top: 6px; }
+  .rec-actions { margin-top: 9px; display: flex; gap: 7px; justify-content: flex-end; }
+  .btn-sm { padding: 4px 11px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--mist); background: none; color: var(--mid); }
+  .btn-sm-ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-bg); }
 
-  .field-error { font-size: 12px; color: var(--err); margin-top: 4px; display: none; }
-  .field-error.show { display: block; }
-
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--mid); }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+  .empty { text-align: center; padding: 36px 16px; color: var(--mid); font-size: 13px; }
+  .empty .ico { font-size: 32px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -105,167 +118,326 @@
 </header>
 
 <nav class="tabs">
-  <div class="tab active" onclick="switchTab('form')">Registrer</div>
-  <div class="tab" onclick="switchTab('records')">Oversigt</div>
+  <div class="tab active"  onclick="switchTab('form')">Registrer</div>
+  <div class="tab"         onclick="switchTab('anmod')">Anmod</div>
+  <div class="tab"         onclick="switchTab('oversigt')">Oversigt</div>
 </nav>
 
+<!-- ── REGISTRER ── -->
 <div class="view active" id="view-form">
   <div class="card">
     <div class="card-title">Udfyld oplysninger – B3-Blanket</div>
 
     <div class="field">
-      <label>Generator / Tank nr.<span class="required">*</span></label>
+      <label>Generator / Tank nr.<span class="req">*</span></label>
       <input type="text" id="f-unit" placeholder="fx EL6219" autocomplete="off">
-      <div class="field-error" id="err-unit">Angiv generator- eller tanknummer</div>
+      <div class="field-err" id="ferr-unit">Angiv generator- eller tanknummer</div>
     </div>
-
     <div class="field">
-      <label>Bookingnr.<span class="required">*</span></label>
+      <label>Bookingnr.<span class="req">*</span></label>
       <input type="text" id="f-booking" placeholder="fx 245420" autocomplete="off">
-      <div class="field-error" id="err-booking">Angiv bookingnummer</div>
+      <div class="field-err" id="ferr-booking">Angiv bookingnummer</div>
     </div>
-
     <div class="field">
-      <label>Dato<span class="required">*</span></label>
+      <label>Dato<span class="req">*</span></label>
       <input type="date" id="f-date">
     </div>
-
     <div class="row-2">
       <div class="field">
-        <label>Brugt<span class="required">*</span><span class="hint">liter</span></label>
+        <label>Brugt<span class="req">*</span><span class="hint">liter</span></label>
         <input type="number" id="f-used" placeholder="0" min="0" step="0.1">
-        <div class="field-error" id="err-used">Angiv antal liter</div>
+        <div class="field-err" id="ferr-used">Angiv antal liter</div>
       </div>
       <div class="field">
         <label>Rest i bak<span class="hint">liter</span></label>
         <input type="number" id="f-rest" placeholder="0" min="0" step="0.1">
       </div>
     </div>
-
     <div class="field">
       <label>Bemærkning<span class="hint">valgfri</span></label>
       <input type="text" id="f-note" placeholder="fx lækage, ekstra påfyldning...">
     </div>
-
-    <button class="btn-submit" onclick="submitForm()">Gem registrering</button>
+    <button class="btn btn-primary" onclick="submitForm()">Gem registrering</button>
   </div>
 </div>
 
-<div class="view" id="view-records">
-  <div class="stats-grid" id="stats-grid"></div>
-  <div class="filter-bar">
-    <input type="text" id="search" placeholder="Søg booking, generator..." oninput="renderRecords()">
-    <button class="btn-export" onclick="exportCSV()">CSV ↓</button>
+<!-- ── ANMOD ── -->
+<div class="view" id="view-anmod">
+  <div class="card">
+    <div class="card-title">Opret anmodning til afdeling</div>
+
+    <div class="field">
+      <label>Generator / Tank nr.<span class="req">*</span></label>
+      <input type="text" id="a-unit" placeholder="fx EL6219" autocomplete="off">
+      <div class="field-err" id="aerr-unit">Angiv generator- eller tanknummer</div>
+    </div>
+    <div class="field">
+      <label>Bookingnr.<span class="req">*</span></label>
+      <input type="text" id="a-booking" placeholder="fx 245420" autocomplete="off">
+      <div class="field-err" id="aerr-booking">Angiv bookingnummer</div>
+    </div>
+    <div class="field">
+      <label>Afdeling<span class="req">*</span></label>
+      <select id="a-dept">
+        <option value="">– Vælg afdeling –</option>
+        <option value="east.transport.dk@godik.dk">Hedehusene (east.transport)</option>
+        <option value="north.transport.dk@godik.dk">Brovst (north.transport)</option>
+      </select>
+      <div class="field-err" id="aerr-dept">Vælg en afdeling</div>
+    </div>
+    <div class="field">
+      <label>Bemærkning<span class="hint">valgfri</span></label>
+      <input type="text" id="a-note" placeholder="fx festival, særlig aftale...">
+    </div>
+    <button class="btn btn-anmod" onclick="sendAnmod()">Send anmodning</button>
   </div>
-  <div class="record-count" id="record-count"></div>
-  <div id="records-list"></div>
+
+  <div style="font-size:12px;color:var(--mid);text-align:center;margin-top:-4px;">
+    Åbner din mail-klient med en færdig besked til afdelingen
+  </div>
+</div>
+
+<!-- ── OVERSIGT ── -->
+<div class="view" id="view-oversigt">
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Søg booking, generator..." oninput="renderOversigt()">
+    <button class="btn-csv" onclick="exportCSV()">CSV ↓</button>
+  </div>
+  <div id="oversigt-content"></div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const KEY = 'godik_diesel_records';
-function getRecords() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
-function saveRecords(a) { localStorage.setItem(KEY, JSON.stringify(a)); }
-function genId() { return 'R' + Date.now().toString(36).toUpperCase(); }
-function today() { return new Date().toISOString().split('T')[0]; }
-function fmtDate(d) { if (!d) return '–'; const [y,m,day] = d.split('-'); return `${day}.${m}.${y}`; }
+const KEY = 'godik_diesel_v2';
+const APP_URL = 'https://anachaplyhina.github.io/godik-diesel-app/';
 
-let toastTimer;
-function showToast(msg, isErr=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = isErr ? 'err show' : 'show';
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className='', 3000);
+function getAll()  { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function saveAll(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function uid()     { return 'R' + Date.now().toString(36).toUpperCase(); }
+function todayISO(){ return new Date().toISOString().split('T')[0]; }
+function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; }
+function deptName(email){ return email.includes('east') ? 'Hedehusene' : 'Brovst'; }
+
+// Toast
+let _tt;
+function toast(msg, isErr=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=(isErr?'t-err ':'')+'show';
+  clearTimeout(_tt); _tt=setTimeout(()=>t.className='',3000);
 }
 
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&name==='form')||(i===1&&name==='records')));
-  document.getElementById('view-form').classList.toggle('active', name==='form');
-  document.getElementById('view-records').classList.toggle('active', name==='records');
-  if (name==='records') renderRecords();
+// Tabs
+function switchTab(name){
+  ['form','anmod','oversigt'].forEach(n=>{
+    document.getElementById('view-'+n).classList.toggle('active', n===name);
+  });
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['form','anmod','oversigt'][i]===name);
+  });
+  if(name==='oversigt') renderOversigt();
 }
 
-document.getElementById('f-date').value = today();
+// Set today
+document.getElementById('f-date').value = todayISO();
 
-function validate(id, errId, check) {
-  const el = document.getElementById(id), err = errId ? document.getElementById(errId) : null;
-  const ok = check(el.value);
-  el.classList.toggle('error', !ok);
-  if (err) err.classList.toggle('show', !ok);
-  return ok;
+// Check URL params (pre-filled from anmod link)
+(function prefill(){
+  const p = new URLSearchParams(window.location.search);
+  if(p.get('unit'))    document.getElementById('f-unit').value    = p.get('unit');
+  if(p.get('booking')) document.getElementById('f-booking').value = p.get('booking');
+  if(p.get('unit') || p.get('booking')) switchTab('form');
+})();
+
+// Validate helper
+function chk(id, errId, fn){
+  const el=document.getElementById(id), er=document.getElementById(errId);
+  const ok=fn(el.value); el.classList.toggle('err',!ok); er&&er.classList.toggle('show',!ok); return ok;
 }
 
-function submitForm() {
-  const ok1 = validate('f-unit',    'err-unit',    v => v.trim().length > 0);
-  const ok2 = validate('f-booking', 'err-booking', v => v.trim().length > 0);
-  const ok3 = validate('f-used',    'err-used',    v => v !== '' && parseFloat(v) >= 0);
-  if (!ok1||!ok2||!ok3) { showToast('Udfyld de påkrævede felter', true); return; }
+// ── SUBMIT FORM ──
+function submitForm(){
+  const ok1=chk('f-unit',   'ferr-unit',    v=>v.trim().length>0);
+  const ok2=chk('f-booking','ferr-booking', v=>v.trim().length>0);
+  const ok3=chk('f-used',   'ferr-used',    v=>v!==''&&parseFloat(v)>=0);
+  if(!ok1||!ok2||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
 
-  const r = {
-    id:      genId(),
+  const unit    = document.getElementById('f-unit').value.trim();
+  const booking = document.getElementById('f-booking').value.trim();
+  const all = getAll();
+
+  // Find matching pending request and mark as done
+  const pending = all.find(r => r.type==='anmod' && r.status==='waiting'
+    && r.booking.toLowerCase()===booking.toLowerCase()
+    && r.unit.toLowerCase()===unit.toLowerCase());
+
+  const record = {
+    id:      uid(),
+    type:    'record',
+    status:  'done',
     ts:      new Date().toISOString(),
-    unit:    document.getElementById('f-unit').value.trim(),
-    booking: document.getElementById('f-booking').value.trim(),
-    date:    document.getElementById('f-date').value || today(),
-    used:    parseFloat(document.getElementById('f-used').value) || 0,
-    rest:    parseFloat(document.getElementById('f-rest').value) || 0,
+    unit,
+    booking,
+    date:    document.getElementById('f-date').value || todayISO(),
+    used:    parseFloat(document.getElementById('f-used').value)||0,
+    rest:    parseFloat(document.getElementById('f-rest').value)||0,
     note:    document.getElementById('f-note').value.trim(),
+    linkedTo: pending ? pending.id : null,
   };
 
-  const records = getRecords(); records.unshift(r); saveRecords(records);
+  if(pending) pending.status = 'done';
+  all.unshift(record);
+  saveAll(all);
 
-  ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id => {
-    const el = document.getElementById(id); el.value=''; el.classList.remove('error');
+  ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id=>{
+    const el=document.getElementById(id); el.value=''; el.classList.remove('err');
   });
-  document.getElementById('f-date').value = today();
-  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
-  showToast('✓ Registrering gemt');
+  document.getElementById('f-date').value = todayISO();
+  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+
+  // Clear URL params if any
+  if(window.location.search) history.replaceState({},'',window.location.pathname);
+
+  toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
 }
 
-function renderRecords() {
-  const records = getRecords();
+// ── SEND ANMOD ──
+function sendAnmod(){
+  const ok1=chk('a-unit',   'aerr-unit',    v=>v.trim().length>0);
+  const ok2=chk('a-booking','aerr-booking', v=>v.trim().length>0);
+  const ok3=chk('a-dept',   'aerr-dept',    v=>v.length>0);
+  if(!ok1||!ok2||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
+
+  const unit    = document.getElementById('a-unit').value.trim();
+  const booking = document.getElementById('a-booking').value.trim();
+  const dept    = document.getElementById('a-dept').value;
+  const note    = document.getElementById('a-note').value.trim();
+
+  // Save pending request
+  const req = {
+    id:      uid(),
+    type:    'anmod',
+    status:  'waiting',
+    ts:      new Date().toISOString(),
+    unit, booking, dept,
+    note,
+  };
+  const all = getAll(); all.unshift(req); saveAll(all);
+
+  // Build prefilled URL for technician
+  const link = `${APP_URL}?unit=${encodeURIComponent(unit)}&booking=${encodeURIComponent(booking)}`;
+
+  // Build mailto
+  const subject = encodeURIComponent(`Anmodning om dieselregistrering – Booking ${booking}`);
+  const body = encodeURIComponent(
+    `Hej,\n\nKan du venligst registrere dieselforbruget for følgende:\n\n` +
+    `Generator / Tank: ${unit}\nBookingnr.: ${booking}` +
+    (note ? `\nBemærkning: ${note}` : '') +
+    `\n\nBrug venligst dette link til at udfylde B3-blanketten:\n${link}\n\nMed venlig hilsen\nGodik – Power`
+  );
+  window.location.href = `mailto:${dept}?subject=${subject}&body=${body}`;
+
+  ['a-unit','a-booking','a-note'].forEach(id=>{ document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
+  document.getElementById('a-dept').value='';
+  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+
+  toast('✓ Anmodning oprettet – mail åbnes');
+}
+
+// ── RENDER OVERSIGT ──
+function renderOversigt(){
+  const all = getAll();
   const q = (document.getElementById('search').value||'').toLowerCase();
-  const filtered = records.filter(r => !q || r.booking.toLowerCase().includes(q) || r.unit.toLowerCase().includes(q) || (r.note&&r.note.toLowerCase().includes(q)));
 
-  const totalUsed = records.reduce((s,r) => s+(r.used||0), 0);
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-box"><div class="stat-value">${records.length}</div><div class="stat-label">Registreringer</div></div>
-    <div class="stat-box"><div class="stat-value">${totalUsed.toFixed(0)}</div><div class="stat-label">Liter i alt</div></div>`;
+  const filter = r => !q ||
+    r.booking.toLowerCase().includes(q) ||
+    r.unit.toLowerCase().includes(q) ||
+    (r.note&&r.note.toLowerCase().includes(q));
 
-  document.getElementById('record-count').textContent =
-    filtered.length===records.length ? `${records.length} registrering${records.length!==1?'er':''}` : `Viser ${filtered.length} af ${records.length}`;
+  const waiting = all.filter(r=>r.type==='anmod' && r.status==='waiting' && filter(r));
+  const done    = all.filter(r=>r.type==='record' && filter(r));
 
-  const list = document.getElementById('records-list');
-  if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>${!records.length?'Ingen registreringer endnu.':'Ingen resultater.'}</p></div>`;
-    return;
+  let html = '';
+
+  // Waiting section
+  html += `<div class="section-label">Afventer oplysninger <span class="badge badge-wait">${waiting.length}</span></div>`;
+  if(!waiting.length){
+    html += `<div class="empty"><div class="ico">✅</div>Ingen ventende anmodninger</div>`;
+  } else {
+    html += waiting.map(r=>`
+      <div class="rec waiting">
+        <div class="rec-top">
+          <div class="rec-booking">Booking: ${r.booking}</div>
+          <span class="status-pill pill-wait">Afventer</span>
+        </div>
+        <div class="rec-tags">
+          <span class="tag">⚙️ ${r.unit}</span>
+          <span class="tag tag-dept">🏢 ${deptName(r.dept)}</span>
+          ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
+        </div>
+        <div class="rec-meta">Oprettet ${fmtDate(r.ts.split('T')[0])}</div>
+        <div class="rec-actions">
+          <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
+          <button class="btn-sm btn-sm-ok" onclick="markDone('${r.id}')">Markér udfyldt</button>
+        </div>
+      </div>`).join('');
   }
-  list.innerHTML = filtered.map(r => `
-    <div class="record-card">
-      <div class="record-top"><div class="record-id">${r.id}</div><div class="record-date">${fmtDate(r.date)}</div></div>
-      <div class="record-booking">Booking: ${r.booking}</div>
-      <div class="record-tags">
-        <span class="tag tag-gen">⚙️ ${r.unit}</span>
-        <span class="tag tag-used">⛽ ${r.used} L brugt</span>
-        ${r.rest>0?`<span class="tag tag-rest">🪣 ${r.rest} L rest</span>`:''}
-        ${r.note?`<span class="tag tag-gen">💬 ${r.note}</span>`:''}
-      </div>
-      <div class="record-actions"><button class="btn-delete" onclick="deleteRecord('${r.id}')">Slet</button></div>
-    </div>`).join('');
+
+  // Done section
+  html += `<div class="section-label" style="margin-top:20px;">Udfyldt <span class="badge badge-done">${done.length}</span></div>`;
+  if(!done.length){
+    html += `<div class="empty"><div class="ico">📋</div>Ingen registreringer endnu</div>`;
+  } else {
+    html += done.map(r=>`
+      <div class="rec done">
+        <div class="rec-top">
+          <div class="rec-booking">Booking: ${r.booking}</div>
+          <span class="status-pill pill-done">Udfyldt</span>
+        </div>
+        <div class="rec-tags">
+          <span class="tag">⚙️ ${r.unit}</span>
+          <span class="tag tag-fuel">⛽ ${r.used} L brugt</span>
+          ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest`:''}
+          ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
+        </div>
+        <div class="rec-meta">${fmtDate(r.date)}${r.linkedTo?' · Udfyldt fra anmodning':''}</div>
+        <div class="rec-actions">
+          <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('oversigt-content').innerHTML = html;
 }
 
-function deleteRecord(id) { saveRecords(getRecords().filter(r=>r.id!==id)); renderRecords(); showToast('Slettet'); }
+// ── MARK DONE MANUALLY ──
+function markDone(id){
+  const all = getAll();
+  const r = all.find(x=>x.id===id);
+  if(r) r.status='done';
+  saveAll(all);
+  renderOversigt();
+  toast('Markeret som udfyldt');
+}
 
-function exportCSV() {
-  const records = getRecords();
-  if (!records.length) { showToast('Ingen data', true); return; }
+// ── DELETE ──
+function deleteRec(id){
+  saveAll(getAll().filter(r=>r.id!==id));
+  renderOversigt();
+  toast('Slettet');
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  const records = getAll().filter(r=>r.type==='record');
+  if(!records.length){ toast('Ingen data at eksportere', true); return; }
   const hdr = ['ID','Dato','Generator/Tank','Booking','Brugt (L)','Rest (L)','Bemærkning','Tidsstempel'];
-  const rows = records.map(r => [r.id,fmtDate(r.date),r.unit,r.booking,r.used,r.rest,r.note||'',r.ts]);
+  const rows = records.map(r=>[r.id,fmtDate(r.date),r.unit,r.booking,r.used,r.rest,r.note||'',r.ts]);
   const csv = [hdr,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-  a.download = `godik_diesel_${today()}.csv`; a.click();
-  showToast('CSV downloadet');
+  a.download = `godik_diesel_${todayISO()}.csv`; a.click();
+  toast('CSV downloadet');
 }
 </script>
 </body>
