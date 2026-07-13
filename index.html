@@ -324,7 +324,18 @@ async function sendAnmod(){
   const all = getAll(); all.unshift(req); saveAll(all);
 
   const link = `${APP_URL}?unit=${encodeURIComponent(unit)}&booking=${encodeURIComponent(booking)}`;
-  const qr_url = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(link)}&choe=UTF-8`;
+  // Generate QR as base64 so it's not blocked by email clients
+  const qrApiUrl = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(link)}&choe=UTF-8`;
+  let qr_url = qrApiUrl;
+  try {
+    const resp = await fetch(qrApiUrl);
+    const blob = await resp.blob();
+    qr_url = await new Promise(res => {
+      const reader = new FileReader();
+      reader.onloadend = () => res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch(e) { console.warn('QR base64 failed, using URL fallback', e); }
 
   const btn = document.querySelector('.btn-anmod');
   btn.disabled = true;
