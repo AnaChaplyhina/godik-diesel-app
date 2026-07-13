@@ -354,6 +354,7 @@ async function sendAnmod(){
     document.getElementById('a-dept').value='';
     document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
     toast('✓ Email sendt til ' + deptName(dept));
+    switchTab('oversigt');
   } catch(err) {
     console.error(err);
     toast('Fejl ved afsendelse – prøv igen', true);
