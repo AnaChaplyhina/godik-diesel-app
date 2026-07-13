@@ -106,6 +106,8 @@
   .empty { text-align: center; padding: 36px 16px; color: var(--mid); font-size: 13px; }
   .empty .ico { font-size: 32px; margin-bottom: 8px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("mfcggHWo1nQgX0doS");</script>
 </head>
 <body>
 
@@ -301,7 +303,7 @@ function submitForm(){
 }
 
 // ── SEND ANMOD ──
-function sendAnmod(){
+async function sendAnmod(){
   const ok1=chk('a-unit',   'aerr-unit',    v=>v.trim().length>0);
   const ok2=chk('a-booking','aerr-booking', v=>v.trim().length>0);
   const ok3=chk('a-dept',   'aerr-dept',    v=>v.length>0);
@@ -312,35 +314,42 @@ function sendAnmod(){
   const dept    = document.getElementById('a-dept').value;
   const note    = document.getElementById('a-note').value.trim();
 
-  // Save pending request
   const req = {
     id:      uid(),
     type:    'anmod',
     status:  'waiting',
     ts:      new Date().toISOString(),
-    unit, booking, dept,
-    note,
+    unit, booking, dept, note,
   };
   const all = getAll(); all.unshift(req); saveAll(all);
 
-  // Build prefilled URL for technician
   const link = `${APP_URL}?unit=${encodeURIComponent(unit)}&booking=${encodeURIComponent(booking)}`;
+  const qr_url = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(link)}&choe=UTF-8`;
 
-  // Build mailto
-  const subject = encodeURIComponent(`Anmodning om dieselregistrering – Booking ${booking}`);
-  const body = encodeURIComponent(
-    `Hej,\n\nKan du venligst registrere dieselforbruget for følgende:\n\n` +
-    `Generator / Tank: ${unit}\nBookingnr.: ${booking}` +
-    (note ? `\nBemærkning: ${note}` : '') +
-    `\n\nBrug venligst dette link til at udfylde B3-blanketten:\n${link}\n\nMed venlig hilsen\nGodik – Power`
-  );
-  window.location.href = `mailto:${dept}?subject=${subject}&body=${body}`;
+  const btn = document.querySelector('.btn-anmod');
+  btn.disabled = true;
+  btn.textContent = 'Sender...';
 
-  ['a-unit','a-booking','a-note'].forEach(id=>{ document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
-  document.getElementById('a-dept').value='';
-  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
-
-  toast('✓ Anmodning oprettet – mail åbnes');
+  try {
+    await emailjs.send('service_e3uxna4', 'template_ti9sr7o', {
+      to_email: dept,
+      unit,
+      booking,
+      note:    note || '–',
+      link,
+      qr_url,
+    });
+    ['a-unit','a-booking','a-note'].forEach(id=>{ document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
+    document.getElementById('a-dept').value='';
+    document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+    toast('✓ Email sendt til ' + deptName(dept));
+  } catch(err) {
+    console.error(err);
+    toast('Fejl ved afsendelse – prøv igen', true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send anmodning';
+  }
 }
 
 // ── RENDER OVERSIGT ──
