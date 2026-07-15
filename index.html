@@ -112,6 +112,8 @@
 
   /* hint text below anmod btn */
   .hint-text { font-size: 11px; color: var(--text-body); text-align: center; margin-top: -2px; font-weight: 600; }
+  .photo-upload-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; border:2px dashed var(--dark-beige); border-radius:8px; background:var(--beige); font-size:13px; font-weight:700; color:var(--dark-green); cursor:pointer; transition:border-color .15s; font-family:var(--font); }
+  .photo-upload-btn:hover { border-color:var(--green); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("mfcggHWo1nQgX0doS");</script>
@@ -167,6 +169,17 @@
     <div class="field">
       <label>Bemærkning<span class="hint">valgfri</span></label>
       <input type="text" id="f-note" placeholder="fx lækage, ekstra påfyldning...">
+    </div>
+    <div class="field">
+      <label>Foto<span class="hint">valgfri</span></label>
+      <label class="photo-upload-btn" for="f-photo">
+        <span id="photo-label">📷 Vedhæft foto</span>
+      </label>
+      <input type="file" id="f-photo" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelect(this)">
+      <div id="photo-preview-wrap" style="display:none; margin-top:8px;">
+        <img id="photo-preview" style="width:100%; border-radius:8px; border:1.5px solid var(--dark-beige);" />
+        <button type="button" onclick="clearPhoto()" style="margin-top:6px; font-size:11px; font-weight:700; font-family:var(--font); background:none; border:1.5px solid var(--dark-beige); border-radius:6px; padding:4px 12px; color:var(--text-body); cursor:pointer;">Fjern foto</button>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="submitForm()">Gem registrering</button>
   </div>
@@ -287,6 +300,39 @@ function chk(id, errId, fn){
   const ok=fn(el.value); el.classList.toggle('err',!ok); er&&er.classList.toggle('show',!ok); return ok;
 }
 
+// ── PHOTO HELPERS ──
+function onPhotoSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const label = file.name.length > 25 ? file.name.substring(0,25)+'...' : file.name;
+  document.getElementById('photo-label').textContent = '📷 ' + label;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('photo-preview').src = e.target.result;
+    document.getElementById('photo-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+  document.getElementById('f-photo').value = '';
+  document.getElementById('photo-label').textContent = '📷 Vedhæft foto';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  document.getElementById('photo-preview').src = '';
+}
+
+async function uploadPhoto(file, recordId) {
+  const ext = file.name.split('.').pop();
+  const path = `${recordId}.${ext}`;
+  const res = await fetch(`${SB_URL}/storage/v1/object/photos/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': file.type },
+    body: file
+  });
+  if (!res.ok) throw new Error('Photo upload failed');
+  return `${SB_URL}/storage/v1/object/public/photos/${path}`;
+}
+
 // ── SUBMIT FORM ──
 async function submitForm(){
   const ok1=chk('f-unit',   'ferr-unit',    v=>v.trim().length>0);
@@ -307,8 +353,17 @@ async function submitForm(){
       pending = rows && rows[0];
     }
 
+    const photoFile = document.getElementById('f-photo').files[0];
+    const recordId = uid();
+
+    let photoUrl = null;
+    if (photoFile) {
+      try { photoUrl = await uploadPhoto(photoFile, recordId); }
+      catch(e) { console.warn('Photo upload failed:', e); }
+    }
+
     const record = {
-      id:        uid(),
+      id:        recordId,
       type:      'record',
       status:    'done',
       unit,
@@ -318,11 +373,13 @@ async function submitForm(){
       rest:      parseFloat(document.getElementById('f-rest').value)||0,
       note:      document.getElementById('f-note').value.trim() || null,
       linked_to: pending ? pending.id : null,
+      photo_url: photoUrl,
     };
 
     await sbInsert(record);
     if(pending) await sbUpdate(pending.id, { status: 'done' });
 
+    clearPhoto();
     ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id=>{
       const el=document.getElementById(id); el.value=''; el.classList.remove('err');
     });
@@ -456,10 +513,11 @@ async function renderOversigt(){
         <div class="rec-tags">
           <span class="tag">⚙️ ${r.unit}</span>
           <span class="tag tag-fuel">⛽ ${r.used} L brugt</span>
-          ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest`:''}
+          ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest</span>`:''}
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}</div>
+        ${r.photo_url?`<img src="${r.photo_url}" style="width:100%;border-radius:8px;margin-top:8px;border:1.5px solid var(--dark-beige);" onclick="window.open('${r.photo_url}','_blank')" />`:''}
+        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?' · 📷 Foto vedhæftet':''}</div>
         <div class="rec-actions">
           <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
         </div>
