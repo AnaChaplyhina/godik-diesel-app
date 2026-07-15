@@ -211,15 +211,37 @@
 <div id="toast"></div>
 
 <script>
-const KEY = 'godik_diesel_v2';
-const APP_URL = 'https://bit.ly/godik-diesel-el6219';
+const APP_URL   = 'https://bit.ly/godik-diesel-el6219';
+const SB_URL    = 'https://wfggcslxcxguxhbodxdb.supabase.co';
+const SB_KEY    = 'sb_publishable_cLRfLHzlTpKAuFq_BKf1sA_IxAysueU';
+const SB_HEADERS = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
-function getAll()  { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
-function saveAll(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
 function uid()     { return 'R' + Date.now().toString(36).toUpperCase(); }
 function todayISO(){ return new Date().toISOString().split('T')[0]; }
 function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; }
 function deptName(email){ return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
+
+async function sbGet(filter='') {
+  const res = await fetch(`${SB_URL}/rest/v1/registrations?order=created_at.desc${filter}`, { headers: SB_HEADERS });
+  return await res.json();
+}
+async function sbInsert(row) {
+  await fetch(`${SB_URL}/rest/v1/registrations`, {
+    method: 'POST', headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(row)
+  });
+}
+async function sbUpdate(id, patch) {
+  await fetch(`${SB_URL}/rest/v1/registrations?id=eq.${id}`, {
+    method: 'PATCH', headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(patch)
+  });
+}
+async function sbDelete(id) {
+  await fetch(`${SB_URL}/rest/v1/registrations?id=eq.${id}`, {
+    method: 'DELETE', headers: SB_HEADERS
+  });
+}
 
 // Toast
 let _tt;
@@ -258,48 +280,55 @@ function chk(id, errId, fn){
 }
 
 // ── SUBMIT FORM ──
-function submitForm(){
+async function submitForm(){
   const ok1=chk('f-unit',   'ferr-unit',    v=>v.trim().length>0);
   const ok3=chk('f-used',   'ferr-used',    v=>v!==''&&parseFloat(v)>=0);
   if(!ok1||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
 
   const unit    = document.getElementById('f-unit').value.trim();
   const booking = document.getElementById('f-booking').value.trim();
-  const all = getAll();
 
-  // Find matching pending request and mark as done
-  const pending = all.find(r => r.type==='anmod' && r.status==='waiting'
-    && r.booking.toLowerCase()===booking.toLowerCase()
-    && r.unit.toLowerCase()===unit.toLowerCase());
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true; btn.textContent = 'Gemmer...';
 
-  const record = {
-    id:      uid(),
-    type:    'record',
-    status:  'done',
-    ts:      new Date().toISOString(),
-    unit,
-    booking,
-    date:    document.getElementById('f-date').value || todayISO(),
-    used:    parseFloat(document.getElementById('f-used').value)||0,
-    rest:    parseFloat(document.getElementById('f-rest').value)||0,
-    note:    document.getElementById('f-note').value.trim(),
-    linkedTo: pending ? pending.id : null,
-  };
+  try {
+    // Find matching pending anmod
+    let pending = null;
+    if(booking) {
+      const rows = await sbGet(`&type=eq.anmod&status=eq.waiting&unit=eq.${encodeURIComponent(unit)}&booking=eq.${encodeURIComponent(booking)}`);
+      pending = rows && rows[0];
+    }
 
-  if(pending) pending.status = 'done';
-  all.unshift(record);
-  saveAll(all);
+    const record = {
+      id:        uid(),
+      type:      'record',
+      status:    'done',
+      unit,
+      booking:   booking || null,
+      date:      document.getElementById('f-date').value || todayISO(),
+      used:      parseFloat(document.getElementById('f-used').value)||0,
+      rest:      parseFloat(document.getElementById('f-rest').value)||0,
+      note:      document.getElementById('f-note').value.trim() || null,
+      linked_to: pending ? pending.id : null,
+    };
 
-  ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id=>{
-    const el=document.getElementById(id); el.value=''; el.classList.remove('err');
-  });
-  document.getElementById('f-date').value = todayISO();
-  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+    await sbInsert(record);
+    if(pending) await sbUpdate(pending.id, { status: 'done' });
 
-  // Clear URL params if any
-  if(window.location.search) history.replaceState({},'',window.location.pathname);
+    ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id=>{
+      const el=document.getElementById(id); el.value=''; el.classList.remove('err');
+    });
+    document.getElementById('f-date').value = todayISO();
+    document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+    if(window.location.search) history.replaceState({},'',window.location.pathname);
 
-  toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
+    toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
+  } catch(e) {
+    console.error(e);
+    toast('Fejl ved gemning – prøv igen', true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Gem registrering';
+  }
 }
 
 // ── SEND ANMOD ──
@@ -318,10 +347,10 @@ async function sendAnmod(){
     id:      uid(),
     type:    'anmod',
     status:  'waiting',
-    ts:      new Date().toISOString(),
-    unit, booking, dept, note,
+    unit, booking, dept,
+    note:    note || null,
   };
-  const all = getAll(); all.unshift(req); saveAll(all);
+  await sbInsert(req);
 
   const link = `${APP_URL}?unit=${encodeURIComponent(unit)}&booking=${encodeURIComponent(booking)}`;
   // Generate QR as base64 so it's not blocked by email clients
@@ -365,12 +394,14 @@ async function sendAnmod(){
 }
 
 // ── RENDER OVERSIGT ──
-function renderOversigt(){
-  const all = getAll();
-  const q = (document.getElementById('search').value||'').toLowerCase();
+async function renderOversigt(){
+  document.getElementById('oversigt-content').innerHTML = '<div class="empty"><div class="ico">⏳</div>Henter data...</div>';
+  let all;
+  try { all = await sbGet(); } catch(e) { document.getElementById('oversigt-content').innerHTML = '<div class="empty"><div class="ico">⚠️</div>Kunne ikke hente data</div>'; return; }
 
+  const q = (document.getElementById('search').value||'').toLowerCase();
   const filter = r => !q ||
-    r.booking.toLowerCase().includes(q) ||
+    (r.booking&&r.booking.toLowerCase().includes(q)) ||
     r.unit.toLowerCase().includes(q) ||
     (r.note&&r.note.toLowerCase().includes(q));
 
@@ -395,7 +426,7 @@ function renderOversigt(){
           <span class="tag tag-dept">🏢 ${deptName(r.dept)}</span>
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">Oprettet ${fmtDate(r.ts.split('T')[0])}</div>
+        <div class="rec-meta">Oprettet ${fmtDate((r.created_at||'').split('T')[0])}</div>
         <div class="rec-actions">
           <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
           <button class="btn-sm btn-sm-ok" onclick="markDone('${r.id}')">Markér udfyldt</button>
@@ -420,7 +451,7 @@ function renderOversigt(){
           ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest`:''}
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">${fmtDate(r.date)}${r.linkedTo?' · Udfyldt fra anmodning':''}</div>
+        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}</div>
         <div class="rec-actions">
           <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
         </div>
@@ -431,25 +462,23 @@ function renderOversigt(){
 }
 
 // ── MARK DONE MANUALLY ──
-function markDone(id){
-  const all = getAll();
-  const r = all.find(x=>x.id===id);
-  if(r) r.status='done';
-  saveAll(all);
+async function markDone(id){
+  await sbUpdate(id, { status: 'done' });
   renderOversigt();
   toast('Markeret som udfyldt');
 }
 
 // ── DELETE ──
-function deleteRec(id){
-  saveAll(getAll().filter(r=>r.id!==id));
+async function deleteRec(id){
+  await sbDelete(id);
   renderOversigt();
   toast('Slettet');
 }
 
 // ── EXPORT CSV ──
-function exportCSV(){
-  const records = getAll().filter(r=>r.type==='record');
+async function exportCSV(){
+  const all = await sbGet('&type=eq.record');
+  const records = all || [];
   if(!records.length){ toast('Ingen data at eksportere', true); return; }
   const hdr = ['ID','Dato','Generator/Tank','Booking','Brugt (L)','Rest (L)','Bemærkning','Tidsstempel'];
   const rows = records.map(r=>[r.id,fmtDate(r.date),r.unit,r.booking,r.used,r.rest,r.note||'',r.ts]);
