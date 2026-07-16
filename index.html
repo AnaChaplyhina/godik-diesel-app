@@ -402,6 +402,18 @@ async function submitForm(){
     document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
     if(window.location.search) history.replaceState({},'',window.location.pathname);
 
+    // Send notification email
+    try {
+      await emailjs.send('service_e3uxna4', 'template_07gtzdy', {
+        unit:    record.unit,
+        booking: record.booking || '–',
+        date:    record.date,
+        used:    record.used,
+        rest:    record.rest || 0,
+        note:    record.note || '–',
+      });
+    } catch(e) { console.warn('Email notification failed:', e); }
+
     toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
   } catch(e) {
     console.error(e);
