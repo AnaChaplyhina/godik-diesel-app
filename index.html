@@ -508,7 +508,13 @@ async function submitForm(){
       });
     } catch(e) { console.error('Email notification failed:', e.status, e.text, e); }
 
-    toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
+    if(pending) {
+      // Came from Afventer — go back to Oversigt with success message
+      toast('✓ Data registreret – booking markeret som udfyldt');
+      setTimeout(() => switchTab('oversigt'), 1200);
+    } else {
+      toast('✓ Registrering gemt');
+    }
   } catch(e) {
     console.error(e);
     toast('Fejl ved gemning – prøv igen', true);
