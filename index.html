@@ -188,14 +188,25 @@
 
   <div class="card" id="pris-card">
     <div class="card-title">Dagens pris – Entreprenør Diesel</div>
-    <div style="font-size:11px;color:var(--text-body);font-weight:600;margin-bottom:12px;">Q8 listepris minus fast rabat på <b>-0,30 øre/liter</b></div>
-    <div style="display:flex;gap:10px;align-items:flex-end;">
-      <div class="field" style="flex:1;margin-bottom:0;">
-        <label>Pris efter rabat<span class="hint">kr/liter</span></label>
-        <input type="number" id="dagens-pris" placeholder="fx 8.45" step="0.01" min="0">
-      </div>
-      <button class="btn btn-anmod" style="width:auto;padding:12px 20px;margin-top:0;flex-shrink:0;" onclick="saveDagensPris()">Gem pris</button>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Q8 listepris<span class="hint">kr/liter, uden rabat</span></label>
+      <input type="number" id="dagens-pris" placeholder="fx 8.75" step="0.01" min="0" oninput="updatePrisPreview()">
     </div>
+    <div id="pris-preview" style="display:none;background:var(--beige);border-radius:8px;padding:12px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text-body);">Q8 LISTEPRIS</span>
+        <span style="font-size:14px;font-weight:800;color:var(--dark-green);" id="preview-list">–</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text-body);">RABAT</span>
+        <span style="font-size:14px;font-weight:800;color:var(--red);">–0,30 kr/l</span>
+      </div>
+      <div style="border-top:1.5px solid var(--dark-beige);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;font-weight:700;color:var(--dark-green);">PRIS EFTER RABAT</span>
+        <span style="font-size:18px;font-weight:900;color:var(--green);" id="preview-final">–</span>
+      </div>
+    </div>
+    <button class="btn btn-anmod" onclick="saveDagensPris()">Gem pris</button>
     <div id="pris-status" style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;display:none;"></div>
   </div>
 </div>
@@ -320,33 +331,46 @@ function chk(id, errId, fn){
 }
 
 // ── DAGENS PRIS ──
+function updatePrisPreview() {
+  const val = parseFloat(document.getElementById('dagens-pris').value);
+  const preview = document.getElementById('pris-preview');
+  if(!val || val <= 0) { preview.style.display='none'; return; }
+  const afterRabat = (val - 0.30).toFixed(2);
+  document.getElementById('preview-list').textContent  = val.toFixed(2) + ' kr/l';
+  document.getElementById('preview-final').textContent = afterRabat + ' kr/l';
+  preview.style.display = 'block';
+}
+
 async function loadDagensPris() {
   try {
     const today = todayISO();
     const rows = await sbGet(`&select=price&date=eq.${today}`, 'diesel_prices');
     if(rows && rows[0]) {
-      const p = rows[0].price;
-      document.getElementById('dagens-pris').value = p;
+      const r = rows[0];
+      const listepris = r.listepris || (parseFloat(r.price) + 0.30);
+      document.getElementById('dagens-pris').value = listepris.toFixed(2);
+      updatePrisPreview();
       const el = document.getElementById('pris-status');
-      el.textContent = `✓ Dagens pris: ${Number(p).toFixed(2)} kr/l`;
+      el.textContent = `✓ Dagens pris: ${listepris.toFixed(2)} – 0,30 = ${Number(r.price).toFixed(2)} kr/l`;
       el.style.display = 'block';
     }
   } catch(e) { console.warn('Could not load price:', e); }
 }
 
 async function saveDagensPris() {
-  const val = parseFloat(document.getElementById('dagens-pris').value);
-  if(!val || val <= 0) { toast('Angiv en gyldig pris', true); return; }
+  const listepris = parseFloat(document.getElementById('dagens-pris').value);
+  if(!listepris || listepris <= 0) { toast('Angiv en gyldig pris', true); return; }
+  const afterRabat = Math.round((listepris - 0.30) * 100) / 100;
   try {
     await fetch(`${SB_URL}/rest/v1/diesel_prices`, {
       method: 'POST',
       headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify({ date: todayISO(), price: val })
+      body: JSON.stringify({ date: todayISO(), price: afterRabat, listepris: listepris })
     });
     const el = document.getElementById('pris-status');
-    el.textContent = `✓ Dagens pris gemt: ${val.toFixed(2)} kr/l`;
+    el.textContent = `✓ Gemt: ${listepris.toFixed(2)} kr/l – 0,30 = ${afterRabat.toFixed(2)} kr/l`;
     el.style.display = 'block';
-    toast(`✓ Pris gemt: ${val.toFixed(2)} kr/l`);
+    toast(`✓ Pris gemt: ${afterRabat.toFixed(2)} kr/l`);
   } catch(e) { toast('Fejl ved gemning af pris', true); }
 }
 
