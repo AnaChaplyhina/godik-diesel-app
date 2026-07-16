@@ -117,6 +117,7 @@
   .photo-upload-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; border:2px dashed var(--dark-beige); border-radius:8px; background:var(--beige); font-size:13px; font-weight:700; color:var(--dark-green); cursor:pointer; transition:border-color .15s; font-family:var(--font); }
   .photo-upload-btn:hover { border-color:var(--green); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("mfcggHWo1nQgX0doS");</script>
 </head>
@@ -206,7 +207,10 @@
         <span style="font-size:18px;font-weight:900;color:var(--green);" id="preview-final">–</span>
       </div>
     </div>
-    <button class="btn btn-anmod" onclick="saveDagensPris()">Gem pris</button>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+      <button class="btn btn-anmod" style="flex:1;" onclick="saveDagensPris()">Gem pris</button>
+      <button onclick="openPrisHistorik()" style="background:none;border:1.5px solid var(--dark-beige);border-radius:8px;padding:12px 16px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;white-space:nowrap;font-family:var(--font);">📈 Prishistorik</button>
+    </div>
     <div id="pris-status" style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;display:none;"></div>
   </div>
 </div>
@@ -716,6 +720,95 @@ function fillFromAnmod(unit, booking, anmodId) {
   setTimeout(() => document.getElementById('f-used').focus(), 100);
 }
 
+// ── PRIS HISTORIK ──
+let chartInstance = null;
+
+async function openPrisHistorik() {
+  const modal = document.getElementById('pris-modal');
+  modal.style.display = 'flex';
+
+  try {
+    const rows = await sbGet('&order=date.asc&limit=30', 'diesel_prices');
+    if(!rows || !rows.length) {
+      document.getElementById('pris-table').innerHTML = '<div class="empty"><div class="ico">📊</div>Ingen prisdata endnu</div>';
+      return;
+    }
+
+    // Build chart
+    const labels = rows.map(r => fmtDate(r.date));
+    const data   = rows.map(r => Number(r.price));
+    const listep = rows.map(r => Number(r.listepris || (r.price + 0.30)));
+
+    const ctx = document.getElementById('pris-chart').getContext('2d');
+    if(chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Pris efter rabat (kr/l)',
+          data,
+          borderColor: '#008545',
+          backgroundColor: 'rgba(0,133,69,0.08)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#008545',
+          pointRadius: 4,
+          tension: 0.3,
+          fill: true,
+        },{
+          label: 'Q8 listepris (kr/l)',
+          data: listep,
+          borderColor: '#E8EAE3',
+          borderWidth: 1.5,
+          pointRadius: 2,
+          borderDash: [4,4],
+          tension: 0.3,
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { font: { family: 'Raleway', size: 11 }, color: '#082600' } }
+        },
+        scales: {
+          y: {
+            ticks: { callback: v => v.toFixed(2)+' kr', font: { size: 10 } },
+            grid: { color: '#E8EAE3' }
+          },
+          x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+        }
+      }
+    });
+
+    // Build table
+    const tableRows = [...rows].reverse().map((r, i) => {
+      const prev = rows[rows.length - 2 - i];
+      const diff = prev ? (Number(r.price) - Number(prev.price)) : 0;
+      const arrow = diff > 0 ? `<span style="color:#E62B27;">▲ +${diff.toFixed(2)}</span>`
+                  : diff < 0 ? `<span style="color:#008545;">▼ ${diff.toFixed(2)}</span>`
+                  : `<span style="color:#636363;">–</span>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--dark-beige);font-size:13px;">
+        <span style="color:var(--mid);font-weight:600;">${fmtDate(r.date)}</span>
+        <span style="font-weight:800;color:var(--dark-green);">${Number(r.price).toFixed(2)} kr/l</span>
+        <span style="font-size:11px;">${arrow}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('pris-table').innerHTML = `
+      <div style="font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">Seneste priser</div>
+      <div style="border:1px solid var(--dark-beige);border-radius:8px;overflow:hidden;">${tableRows}</div>`;
+
+  } catch(e) {
+    document.getElementById('pris-table').innerHTML = '<div class="empty">Kunne ikke hente data</div>';
+    console.error(e);
+  }
+}
+
+function closePrisHistorik() {
+  document.getElementById('pris-modal').style.display = 'none';
+}
+
 // ── PHOTO MODAL ──
 function openPhoto(url) {
   const modal = document.getElementById('photo-modal');
@@ -741,6 +834,17 @@ async function exportCSV(){
   toast('CSV downloadet');
 }
 </script>
+<div id="pris-modal" onclick="closePrisHistorik()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;align-items:flex-end;justify-content:center;">
+  <div onclick="event.stopPropagation()" style="background:var(--white);width:100%;max-width:600px;border-radius:16px 16px 0 0;padding:24px 20px 40px;max-height:85dvh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;text-transform:uppercase;">Prishistorik – Entreprenør Diesel</div>
+      <button onclick="closePrisHistorik()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--mid);line-height:1;">×</button>
+    </div>
+    <canvas id="pris-chart" style="width:100%;max-height:200px;margin-bottom:20px;"></canvas>
+    <div id="pris-table"></div>
+  </div>
+</div>
+
 <div id="photo-modal" onclick="closePhoto()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <img id="modal-img" style="max-width:100%;max-height:90dvh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.5);" onclick="event.stopPropagation()"/>
   <button onclick="closePhoto()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:white;font-size:32px;cursor:pointer;line-height:1;">×</button>
