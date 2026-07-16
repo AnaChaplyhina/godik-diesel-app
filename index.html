@@ -112,6 +112,7 @@
 
   /* hint text below anmod btn */
   .photo-tag { color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline; }
+  .pris-row { display:flex; align-items:center; gap:4px; margin-top:8px; padding-top:8px; border-top:1px solid var(--dark-beige); }
   .hint-text { font-size: 11px; color: var(--text-body); text-align: center; margin-top: -2px; font-weight: 600; }
   .photo-upload-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; border:2px dashed var(--dark-beige); border-radius:8px; background:var(--beige); font-size:13px; font-weight:700; color:var(--dark-green); cursor:pointer; transition:border-color .15s; font-family:var(--font); }
   .photo-upload-btn:hover { border-color:var(--green); }
@@ -140,6 +141,18 @@
 
 <!-- ── REGISTRER ── -->
 <div class="view active" id="view-form">
+  <div class="card" id="pris-card">
+    <div class="card-title">Dagens dieselpris</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;">
+      <div class="field" style="flex:1;margin-bottom:0;">
+        <label>Q8 pris – rabat<span class="hint">kr/liter</span></label>
+        <input type="number" id="dagens-pris" placeholder="fx 8.45" step="0.01" min="0">
+      </div>
+      <button class="btn btn-primary" style="width:auto;padding:12px 20px;margin-top:0;flex-shrink:0;" onclick="saveDagensPris()">Gem pris</button>
+    </div>
+    <div id="pris-status" style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;display:none;"></div>
+  </div>
+
   <div class="card">
     <div class="card-title">Udfyld oplysninger – B3-Blanket</div>
 
@@ -244,8 +257,9 @@ function todayISO(){ return new Date().toISOString().split('T')[0]; }
 function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; }
 function deptName(email){ return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
 
-async function sbGet(filter='') {
-  const res = await fetch(`${SB_URL}/rest/v1/registrations?order=created_at.desc${filter}`, { headers: SB_HEADERS });
+async function sbGet(filter='', table='registrations') {
+  const order = table==='registrations' ? '?order=created_at.desc' : '?';
+  const res = await fetch(`${SB_URL}/rest/v1/${table}${order}${filter.startsWith('&')?filter:filter}`, { headers: SB_HEADERS });
   return await res.json();
 }
 async function sbInsert(row) {
@@ -283,6 +297,7 @@ function switchTab(name){
     t.classList.toggle('active',['form','anmod','oversigt'][i]===name);
   });
   if(name==='oversigt') renderOversigt();
+  if(name==='form') loadDagensPris();
 }
 
 // Set today
@@ -295,11 +310,53 @@ document.getElementById('f-date').value = todayISO();
   if(p.get('booking')) document.getElementById('f-booking').value = p.get('booking');
   if(p.get('unit') || p.get('booking')) switchTab('form');
 })();
+loadDagensPris();
 
 // Validate helper
 function chk(id, errId, fn){
   const el=document.getElementById(id), er=document.getElementById(errId);
   const ok=fn(el.value); el.classList.toggle('err',!ok); er&&er.classList.toggle('show',!ok); return ok;
+}
+
+// ── DAGENS PRIS ──
+async function loadDagensPris() {
+  try {
+    const today = todayISO();
+    const rows = await sbGet(`&select=price&date=eq.${today}`, 'diesel_prices');
+    if(rows && rows[0]) {
+      const p = rows[0].price;
+      document.getElementById('dagens-pris').value = p;
+      const el = document.getElementById('pris-status');
+      el.textContent = `✓ Dagens pris: ${Number(p).toFixed(2)} kr/l`;
+      el.style.display = 'block';
+    }
+  } catch(e) { console.warn('Could not load price:', e); }
+}
+
+async function saveDagensPris() {
+  const val = parseFloat(document.getElementById('dagens-pris').value);
+  if(!val || val <= 0) { toast('Angiv en gyldig pris', true); return; }
+  try {
+    await fetch(`${SB_URL}/rest/v1/diesel_prices`, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ date: todayISO(), price: val })
+    });
+    const el = document.getElementById('pris-status');
+    el.textContent = `✓ Dagens pris gemt: ${val.toFixed(2)} kr/l`;
+    el.style.display = 'block';
+    toast(`✓ Pris gemt: ${val.toFixed(2)} kr/l`);
+  } catch(e) { toast('Fejl ved gemning af pris', true); }
+}
+
+async function editPris(recordId, currentPris) {
+  const val = prompt('Indtast pris pr. liter (kr):', currentPris || '');
+  if(val === null) return;
+  const num = parseFloat(val.replace(',','.'));
+  if(isNaN(num) || num <= 0) { toast('Ugyldig pris', true); return; }
+  await sbUpdate(recordId, { price_per_liter: num });
+  renderOversigt();
+  toast(`✓ Pris opdateret: ${num.toFixed(2)} kr/l`);
 }
 
 // ── PHOTO HELPERS ──
@@ -546,6 +603,11 @@ async function renderOversigt(){
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
         <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?` · <span class="photo-tag" onclick="openPhoto('${r.photo_url}')">📷 Se foto</span>`:''}</div>
+        <div class="pris-row" id="pris-${r.id}">
+          <span style="font-size:11px;color:var(--text-body);font-weight:600;">PRIS PR. LITER:</span>
+          <span class="pris-value" style="font-size:13px;font-weight:800;color:var(--dark-green);margin:0 6px;">${r.price_per_liter ? r.price_per_liter.toFixed(2)+' kr' : '–'}</span>
+          <button class="btn-sm" style="font-size:10px;padding:3px 8px;" onclick="editPris('${r.id}', ${r.price_per_liter||0})">✏️</button>
+        </div>
         <div class="rec-actions">
           <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
         </div>
