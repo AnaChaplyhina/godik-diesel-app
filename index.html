@@ -350,7 +350,7 @@ function switchTab(name){
   });
   if(name==='oversigt') { renderOversigt(); document.getElementById('close-form-btn').style.display='none'; }
   if(name==='anmod') loadDagensPris();
-  if(name==='form' && !window._pendingAnmodId) document.getElementById('close-form-btn').style.display='none';
+
 }
 
 // Set today
@@ -780,8 +780,8 @@ function fillFromAnmod(unit, booking, anmodId) {
   document.getElementById('f-note').value    = '';
   clearPhoto();
   window._pendingAnmodId = anmodId;
-  document.getElementById('close-form-btn').style.display = 'block';
   switchTab('form');
+  document.getElementById('close-form-btn').style.display = 'block';
   // Scroll to used field
   setTimeout(() => document.getElementById('f-used').focus(), 100);
 }
