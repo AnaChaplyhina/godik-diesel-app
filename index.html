@@ -235,6 +235,7 @@
 const APP_URL   = 'https://bit.ly/godik-diesel-el6219';
 const SB_URL    = 'https://wfggcslxcxguxhbodxdb.supabase.co';
 const SB_KEY    = 'sb_publishable_cLRfLHzlTpKAuFq_BKf1sA_IxAysueU';
+const SB_ANON   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmZ2djc2x4Y3hndXhoYm9keGRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMDI3MDgsImV4cCI6MjA5OTY3ODcwOH0.KZyz6-v0a_Zz0I-m6GtyavyE9ZRPI54ggFmSE5pp6L8';
 const SB_HEADERS = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 function uid()     { return 'R' + Date.now().toString(36).toUpperCase(); }
@@ -326,7 +327,7 @@ async function uploadPhoto(file, recordId) {
   const path = `${recordId}.${ext}`;
   const res = await fetch(`${SB_URL}/storage/v1/object/photos/${path}`, {
     method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': file.type },
+    headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'Content-Type': file.type },
     body: file
   });
   if (!res.ok) throw new Error('Photo upload failed');
