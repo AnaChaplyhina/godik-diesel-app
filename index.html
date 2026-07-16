@@ -357,9 +357,13 @@ async function submitForm(){
   btn.disabled = true; btn.textContent = 'Gemmer...';
 
   try {
-    // Find matching pending anmod
+    // Find matching pending anmod — either from direct click or by unit/booking match
     let pending = null;
-    if(booking) {
+    if(window._pendingAnmodId) {
+      const rows = await sbGet(`&type=eq.anmod&id=eq.${window._pendingAnmodId}`);
+      pending = rows && rows[0];
+      window._pendingAnmodId = null;
+    } else if(booking) {
       const rows = await sbGet(`&type=eq.anmod&status=eq.waiting&unit=eq.${encodeURIComponent(unit)}&booking=eq.${encodeURIComponent(booking)}`);
       pending = rows && rows[0];
     }
@@ -492,9 +496,9 @@ async function renderOversigt(){
     html += `<div class="empty"><div class="ico">✅</div>Ingen ventende anmodninger</div>`;
   } else {
     html += waiting.map(r=>`
-      <div class="rec waiting">
+      <div class="rec waiting" style="cursor:pointer;" onclick="fillFromAnmod('${r.unit}','${r.booking||''}','${r.id}')">
         <div class="rec-top">
-          <div class="rec-booking">Booking: ${r.booking}</div>
+          <div class="rec-booking">Booking: ${r.booking||'–'}</div>
           <span class="status-pill pill-wait">Afventer</span>
         </div>
         <div class="rec-tags">
@@ -502,10 +506,10 @@ async function renderOversigt(){
           <span class="tag tag-dept">🏢 ${deptName(r.dept)}</span>
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">Oprettet ${fmtDate((r.created_at||'').split('T')[0])}</div>
+        <div class="rec-meta">Oprettet ${fmtDate((r.created_at||'').split('T')[0])} · <span style="color:var(--green);font-weight:700;">Tryk for at udfylde →</span></div>
         <div class="rec-actions">
-          <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
-          <button class="btn-sm btn-sm-ok" onclick="markDone('${r.id}')">Markér udfyldt</button>
+          <button class="btn-sm" onclick="event.stopPropagation();deleteRec('${r.id}')">Slet</button>
+          <button class="btn-sm btn-sm-ok" onclick="event.stopPropagation();markDone('${r.id}')">Markér udfyldt</button>
         </div>
       </div>`).join('');
   }
@@ -549,6 +553,22 @@ async function deleteRec(id){
   await sbDelete(id);
   renderOversigt();
   toast('Slettet');
+}
+
+// ── FILL FROM ANMOD ──
+function fillFromAnmod(unit, booking, anmodId) {
+  document.getElementById('f-unit').value    = unit;
+  document.getElementById('f-booking').value = booking;
+  document.getElementById('f-date').value    = todayISO();
+  document.getElementById('f-used').value    = '';
+  document.getElementById('f-rest').value    = '';
+  document.getElementById('f-note').value    = '';
+  clearPhoto();
+  // Store anmod id so submitForm can link and close it
+  window._pendingAnmodId = anmodId;
+  switchTab('form');
+  // Scroll to used field
+  setTimeout(() => document.getElementById('f-used').focus(), 100);
 }
 
 // ── PHOTO MODAL ──
