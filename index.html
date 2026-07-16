@@ -275,8 +275,9 @@ function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `
 function deptName(email){ return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
 
 async function sbGet(filter='', table='registrations') {
-  const order = table==='registrations' ? '?order=created_at.desc' : '?';
-  const res = await fetch(`${SB_URL}/rest/v1/${table}${order}${filter.startsWith('&')?filter:filter}`, { headers: SB_HEADERS });
+  const base = table==='registrations' ? '?order=created_at.desc' : '?select=*';
+  const sep = filter.startsWith('&') ? '' : (filter ? '&' : '');
+  const res = await fetch(`${SB_URL}/rest/v1/${table}${base}${sep}${filter}`, { headers: SB_HEADERS });
   return await res.json();
 }
 async function sbInsert(row) {
