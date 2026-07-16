@@ -145,7 +145,10 @@
 <!-- ── REGISTRER ── -->
 <div class="view active" id="view-form">
   <div class="card">
-    <div class="card-title">Udfyld oplysninger – B3-Blanket</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:0;">Udfyld oplysninger – B3-Blanket</div>
+      <button id="close-form-btn" onclick="switchTab('oversigt')" style="display:none;background:none;border:1.5px solid var(--dark-beige);border-radius:6px;width:30px;height:30px;font-size:16px;cursor:pointer;color:var(--mid);line-height:1;font-family:var(--font);">×</button>
+    </div>
 
     <div class="field">
       <label>Generator / Tank nr.<span class="req">*</span></label>
@@ -345,8 +348,9 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach((t,i)=>{
     t.classList.toggle('active',['form','anmod','oversigt'][i]===name);
   });
-  if(name==='oversigt') renderOversigt();
+  if(name==='oversigt') { renderOversigt(); document.getElementById('close-form-btn').style.display='none'; }
   if(name==='anmod') loadDagensPris();
+  if(name==='form' && !window._pendingAnmodId) document.getElementById('close-form-btn').style.display='none';
 }
 
 // Set today
@@ -775,8 +779,8 @@ function fillFromAnmod(unit, booking, anmodId) {
   document.getElementById('f-rest').value    = '';
   document.getElementById('f-note').value    = '';
   clearPhoto();
-  // Store anmod id so submitForm can link and close it
   window._pendingAnmodId = anmodId;
+  document.getElementById('close-form-btn').style.display = 'block';
   switchTab('form');
   // Scroll to used field
   setTimeout(() => document.getElementById('f-used').focus(), 100);
