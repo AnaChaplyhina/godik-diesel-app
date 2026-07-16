@@ -543,7 +543,30 @@ async function renderOversigt(){
 
 // ── MARK DONE MANUALLY ──
 async function markDone(id){
+  // Get the anmod record first
+  const rows = await sbGet(`&id=eq.${id}`);
+  const anmod = rows && rows[0];
+
+  // Mark anmod as done
   await sbUpdate(id, { status: 'done' });
+
+  // Create a matching record in Udfyldt so it shows up there
+  if(anmod) {
+    await sbInsert({
+      id:        uid(),
+      type:      'record',
+      status:    'done',
+      unit:      anmod.unit,
+      booking:   anmod.booking || null,
+      date:      todayISO(),
+      used:      0,
+      rest:      0,
+      note:      anmod.note || null,
+      linked_to: anmod.id,
+      photo_url: null,
+    });
+  }
+
   renderOversigt();
   toast('Markeret som udfyldt');
 }
