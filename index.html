@@ -405,12 +405,14 @@ async function submitForm(){
     // Send notification email
     try {
       await emailjs.send('service_e3uxna4', 'template_07gtzdy', {
-        unit:    record.unit,
-        booking: record.booking || '–',
-        date:    record.date,
-        used:    record.used,
-        rest:    record.rest || 0,
-        note:    record.note || '–',
+        to_email: 'chaplyhina.anastasiia@gmail.com',
+        unit:     record.unit,
+        booking:  record.booking || '–',
+        date:     record.date,
+        used:     record.used,
+        rest:     record.rest || 0,
+        note:     record.note || '–',
+        photo:    record.photo_url ? `<a href="${record.photo_url}" style="color:#008545;font-weight:700;">Se vedhæftet foto →</a>` : 'Intet foto',
       });
     } catch(e) { console.warn('Email notification failed:', e); }
 
