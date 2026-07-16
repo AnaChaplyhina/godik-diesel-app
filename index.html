@@ -111,6 +111,7 @@
   .field-err.show { display: block; }
 
   /* hint text below anmod btn */
+  .photo-tag { color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline; }
   .hint-text { font-size: 11px; color: var(--text-body); text-align: center; margin-top: -2px; font-weight: 600; }
   .photo-upload-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; border:2px dashed var(--dark-beige); border-radius:8px; background:var(--beige); font-size:13px; font-weight:700; color:var(--dark-green); cursor:pointer; transition:border-color .15s; font-family:var(--font); }
   .photo-upload-btn:hover { border-color:var(--green); }
@@ -526,8 +527,7 @@ async function renderOversigt(){
           ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest</span>`:''}
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        ${r.photo_url?`<img src="${r.photo_url}" style="width:100%;border-radius:8px;margin-top:8px;border:1.5px solid var(--dark-beige);" onclick="window.open('${r.photo_url}','_blank')" />`:''}
-        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?' · 📷 Foto vedhæftet':''}</div>
+        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?` · <span class="photo-tag" onclick="openPhoto('${r.photo_url}')">📷 Se foto</span>`:''}</div>
         <div class="rec-actions">
           <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
         </div>
@@ -551,6 +551,17 @@ async function deleteRec(id){
   toast('Slettet');
 }
 
+// ── PHOTO MODAL ──
+function openPhoto(url) {
+  const modal = document.getElementById('photo-modal');
+  document.getElementById('modal-img').src = url;
+  modal.style.display = 'flex';
+}
+function closePhoto() {
+  document.getElementById('photo-modal').style.display = 'none';
+  document.getElementById('modal-img').src = '';
+}
+
 // ── EXPORT CSV ──
 async function exportCSV(){
   const all = await sbGet('&type=eq.record');
@@ -565,5 +576,9 @@ async function exportCSV(){
   toast('CSV downloadet');
 }
 </script>
+<div id="photo-modal" onclick="closePhoto()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <img id="modal-img" style="max-width:100%;max-height:90dvh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.5);" onclick="event.stopPropagation()"/>
+  <button onclick="closePhoto()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:white;font-size:32px;cursor:pointer;line-height:1;">×</button>
+</div>
 </body>
 </html>
