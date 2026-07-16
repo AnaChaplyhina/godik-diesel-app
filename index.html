@@ -111,6 +111,8 @@
   .field-err.show { display: block; }
 
   /* hint text below anmod btn */
+  .filter-btn { padding:7px 14px; border:1.5px solid var(--dark-beige); border-radius:20px; font-size:11px; font-weight:700; font-family:var(--font); color:var(--mid); background:var(--white); cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.4px; }
+  .filter-btn.active { background:var(--dark-green); color:var(--white); border-color:var(--dark-green); }
   .photo-tag { color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline; }
   .pris-row { display:flex; align-items:center; gap:4px; margin-top:8px; padding-top:8px; border-top:1px solid var(--dark-beige); }
   .hint-text { font-size: 11px; color: var(--text-body); text-align: center; margin-top: -2px; font-weight: 600; }
@@ -252,6 +254,11 @@
 
 <!-- ── OVERSIGT ── -->
 <div class="view" id="view-oversigt">
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button class="filter-btn active" id="filter-all"    onclick="setFilter('all')">Alle</button>
+    <button class="filter-btn"        id="filter-week"   onclick="setFilter('week')">Denne uge</button>
+    <button class="filter-btn"        id="filter-month"  onclick="setFilter('month')">Denne måned</button>
+  </div>
   <div class="search-bar">
     <input type="text" id="search" placeholder="Søg booking, generator..." oninput="renderOversigt()">
     <button class="btn-csv" onclick="exportCSV()">CSV ↓</button>
@@ -303,6 +310,31 @@ function toast(msg, isErr=false){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className=(isErr?'t-err ':'')+'show';
   clearTimeout(_tt); _tt=setTimeout(()=>t.className='',3000);
+}
+
+// ── DATE FILTER ──
+let activeFilter = 'all';
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-'+f).classList.add('active');
+  renderOversigt();
+}
+
+function inFilter(dateStr) {
+  if(activeFilter === 'all') return true;
+  if(!dateStr) return true;
+  const d = new Date(dateStr);
+  const now = new Date();
+  if(activeFilter === 'month') {
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }
+  if(activeFilter === 'week') {
+    const start = new Date(now); start.setDate(now.getDate()-now.getDay()+1); start.setHours(0,0,0,0);
+    const end = new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
+    return d >= start && d <= end;
+  }
+  return true;
 }
 
 // Tabs
@@ -602,10 +634,15 @@ async function renderOversigt(){
   try { all = await sbGet(); } catch(e) { document.getElementById('oversigt-content').innerHTML = '<div class="empty"><div class="ico">⚠️</div>Kunne ikke hente data</div>'; return; }
 
   const q = (document.getElementById('search').value||'').toLowerCase();
-  const filter = r => !q ||
-    (r.booking&&r.booking.toLowerCase().includes(q)) ||
-    r.unit.toLowerCase().includes(q) ||
-    (r.note&&r.note.toLowerCase().includes(q));
+  const filter = r => {
+    const matchQ = !q ||
+      (r.booking&&r.booking.toLowerCase().includes(q)) ||
+      r.unit.toLowerCase().includes(q) ||
+      (r.note&&r.note.toLowerCase().includes(q)) ||
+      (r.dept&&deptName(r.dept).toLowerCase().includes(q));
+    const matchDate = inFilter(r.date || (r.created_at||'').split('T')[0]);
+    return matchQ && matchDate;
+  };
 
   const waiting = all.filter(r=>r.type==='anmod' && r.status==='waiting' && filter(r));
   const done    = all.filter(r=>r.type==='record' && filter(r));
@@ -664,6 +701,30 @@ async function renderOversigt(){
         </div>
       </div>`).join('');
   }
+
+  // Summary
+  const totalLiter = done.reduce((s,r) => s+(r.used||0), 0);
+  const withPrice  = done.filter(r=>r.price_per_liter);
+  const avgPrice   = withPrice.length ? (withPrice.reduce((s,r)=>s+Number(r.price_per_liter),0)/withPrice.length) : null;
+
+  html += `<div style="background:var(--dark-green);border-radius:10px;padding:16px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Registreringer</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">${done.length}</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Total forbrug</div>
+      <div style="font-size:22px;font-weight:900;color:#008545;">${totalLiter.toFixed(0)} <span style="font-size:13px;">L</span></div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Gns. pris/liter</div>
+      <div style="font-size:22px;font-weight:900;color:var(--white);">${avgPrice ? avgPrice.toFixed(2)+' kr' : '–'}</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Afventer</div>
+      <div style="font-size:22px;font-weight:900;color:#E62B27;">${waiting.length}</div>
+    </div>
+  </div>`;
 
   document.getElementById('oversigt-content').innerHTML = html;
 }
