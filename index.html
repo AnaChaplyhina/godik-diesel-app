@@ -315,14 +315,7 @@ function switchTab(name){
     t.classList.toggle('active',['form','anmod','oversigt'][i]===name);
   });
   if(name==='oversigt') renderOversigt();
-  if(name==='anmod') // Load pris silently on startup (no UI update needed - element is in anmod tab)
-(async function() {
-  try {
-    const today = todayISO();
-    const rows = await sbGet(`&date=eq.${today}`, 'diesel_prices');
-    if(rows && rows[0]) window._cachedPris = rows[0];
-  } catch(e) {}
-})();
+  if(name==='anmod') loadDagensPris();
 }
 
 // Set today
