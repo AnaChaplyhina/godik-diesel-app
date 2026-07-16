@@ -414,7 +414,7 @@ async function submitForm(){
         note:     record.note || '–',
         photo:    record.photo_url ? `<a href="${record.photo_url}" style="color:#008545;font-weight:700;">Se vedhæftet foto →</a>` : 'Intet foto',
       });
-    } catch(e) { console.warn('Email notification failed:', e); }
+    } catch(e) { console.error('Email notification failed:', e.status, e.text, e); }
 
     toast('✓ Registrering gemt' + (pending?' – anmodning markeret som udfyldt':''));
   } catch(e) {
