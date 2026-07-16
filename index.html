@@ -405,14 +405,14 @@ async function submitForm(){
     // Send notification email
     try {
       await emailjs.send('service_e3uxna4', 'template_07gtzdy', {
-        to_email: 'chaplyhina.anastasiia@gmail.com',
-        unit:     record.unit,
-        booking:  record.booking || '–',
-        date:     record.date,
-        used:     record.used,
-        rest:     record.rest || 0,
-        note:     record.note || '–',
-        photo:    record.photo_url ? `<a href="${record.photo_url}" style="color:#008545;font-weight:700;">Se vedhæftet foto →</a>` : 'Intet foto',
+        to_email:  'chaplyhina.anastasiia@gmail.com',
+        unit:      record.unit,
+        booking:   record.booking || '–',
+        date:      fmtDate(record.date),
+        used:      record.used,
+        rest:      record.rest || 0,
+        note:      record.note || '–',
+        photo_url: record.photo_url || '',
       });
     } catch(e) { console.error('Email notification failed:', e.status, e.text, e); }
 
