@@ -484,6 +484,15 @@ async function submitForm(){
     document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
     if(window.location.search) history.replaceState({},'',window.location.pathname);
 
+    // Fetch dagens pris
+    let dagensPrice = '–';
+    try {
+      const priceRows = await sbGet(`&date=eq.${record.date}`, 'diesel_prices');
+      if(priceRows && priceRows[0]) {
+        dagensPrice = Number(priceRows[0].price).toFixed(2) + ' kr/l';
+      }
+    } catch(e) { console.warn('Could not fetch price:', e); }
+
     // Send notification email
     try {
       await emailjs.send('service_e3uxna4', 'template_07gtzdy', {
@@ -495,6 +504,7 @@ async function submitForm(){
         rest:      record.rest || 0,
         note:      record.note || '–',
         photo_url: record.photo_url || '',
+        pris:      dagensPrice,
       });
     } catch(e) { console.error('Email notification failed:', e.status, e.text, e); }
 
