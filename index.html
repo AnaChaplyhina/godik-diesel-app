@@ -325,7 +325,7 @@ function clearPhoto() {
 async function uploadPhoto(file, recordId) {
   const ext = file.name.split('.').pop() || 'jpg';
   const path = `${recordId}.${ext}`;
-  const res = await fetch(`${SB_URL}/storage/v1/object/photos/${path}`, {
+  const res = await fetch(`${SB_URL}/storage/v1/object/Photos/${path}`, {
     method: 'POST',
     headers: {
       'apikey': SB_ANON,
@@ -340,7 +340,7 @@ async function uploadPhoto(file, recordId) {
     console.error('Storage error:', res.status, err);
     throw new Error('Photo upload failed');
   }
-  return `${SB_URL}/storage/v1/object/public/photos/${path}`;
+  return `${SB_URL}/storage/v1/object/public/Photos/${path}`;
 }
 
 // ── SUBMIT FORM ──
