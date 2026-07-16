@@ -484,12 +484,17 @@ async function submitForm(){
     document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
     if(window.location.search) history.replaceState({},'',window.location.pathname);
 
-    // Fetch dagens pris
+    // Fetch dagens pris and save to record
     let dagensPrice = '–';
+    let dagensNum = null;
     try {
       const priceRows = await sbGet(`&date=eq.${record.date}`, 'diesel_prices');
       if(priceRows && priceRows[0]) {
-        dagensPrice = Number(priceRows[0].price).toFixed(2) + ' kr/l';
+        dagensNum = Number(priceRows[0].price);
+        dagensPrice = dagensNum.toFixed(2) + ' kr/l';
+        // Save price to record
+        await sbUpdate(record.id, { price_per_liter: dagensNum });
+        record.price_per_liter = dagensNum;
       }
     } catch(e) { console.warn('Could not fetch price:', e); }
 
