@@ -114,6 +114,9 @@
   /* hint text below anmod btn */
   .filter-btn { padding:7px 14px; border:1.5px solid var(--dark-beige); border-radius:20px; font-size:11px; font-weight:700; font-family:var(--font); color:var(--mid); background:var(--white); cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.4px; }
   .filter-btn.active { background:var(--dark-green); color:var(--white); border-color:var(--dark-green); }
+  .lang-switch { display:flex; gap:4px; flex-shrink:0; }
+  .lang-btn { padding:5px 9px; border:1.5px solid rgba(255,255,255,0.2); border-radius:6px; font-size:10px; font-weight:800; font-family:var(--font); color:rgba(255,255,255,0.55); background:none; cursor:pointer; letter-spacing:.4px; transition:all .15s; }
+  .lang-btn.active { background:var(--green); color:var(--white); border-color:var(--green); }
   .photo-tag { color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline; }
   .pris-row { display:flex; align-items:center; gap:4px; margin-top:8px; padding-top:8px; border-top:1px solid var(--dark-beige); }
   .hint-text { font-size: 11px; color: var(--text-body); text-align: center; margin-top: -2px; font-weight: 600; }
@@ -126,88 +129,95 @@
 </head>
 <body>
 
-<header class="site-header">
-  <div class="logo-wrap">
-    <img src="data:image/png;base64,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" alt="Godik" height="32" style="display:block;">
+<header class="site-header" style="justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="logo-wrap">
+      <img src="data:image/png;base64,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" alt="Godik" height="32" style="display:block;">
+    </div>
+    <div class="header-divider"></div>
+    <div>
+      <div class="header-title" data-i18n="app_title">Diesel Registrering</div>
+      <div class="header-sub" data-i18n="header_subtitle">Generatorservice · Power</div>
+    </div>
   </div>
-  <div class="header-divider"></div>
-  <div>
-    <div class="header-title">Diesel Registrering</div>
-    <div class="header-sub">Generatorservice · Power</div>
+  <div class="lang-switch">
+    <button class="lang-btn active" data-lang="da" onclick="setLanguage('da')">DA</button>
+    <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+    <button class="lang-btn" data-lang="pl" onclick="setLanguage('pl')">PL</button>
   </div>
 </header>
 
 <nav class="tabs">
-  <div class="tab active"  onclick="switchTab('form')">Registrer</div>
-  <div class="tab"         onclick="switchTab('oversigt')">Oversigt</div>
-  <div class="tab"         onclick="switchTab('anmod')">Anmod</div>
+  <div class="tab active"  onclick="switchTab('form')" data-i18n="tab_registrer">Registrer</div>
+  <div class="tab"         onclick="switchTab('oversigt')" data-i18n="tab_oversigt">Oversigt</div>
+  <div class="tab"         onclick="switchTab('anmod')" data-i18n="tab_anmod">Anmod</div>
 </nav>
 
 <!-- ── REGISTRER ── -->
 <div class="view active" id="view-form">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div class="card-title" style="margin-bottom:0;">Udfyld oplysninger – B3-Blanket</div>
+      <div class="card-title" style="margin-bottom:0;" data-i18n="reg_title">Udfyld oplysninger – B3-Blanket</div>
       <button id="close-form-btn" onclick="switchTab('oversigt')" style="display:none;background:none;border:1.5px solid var(--dark-beige);border-radius:6px;width:30px;height:30px;font-size:16px;cursor:pointer;color:var(--mid);line-height:1;font-family:var(--font);">×</button>
     </div>
 
     <div class="field">
-      <label>Generator / Tank nr.<span class="req">*</span></label>
-      <input type="text" id="f-unit" placeholder="fx EL6219" autocomplete="off">
-      <div class="field-err" id="ferr-unit">Angiv generator- eller tanknummer</div>
+      <label><span data-i18n="label_unit">Generator / Tank nr.</span><span class="req">*</span></label>
+      <input type="text" id="f-unit" placeholder="fx EL6219" data-i18n-placeholder="ph_unit" autocomplete="off">
+      <div class="field-err" id="ferr-unit" data-i18n="err_unit">Angiv generator- eller tanknummer</div>
     </div>
     <div class="field">
-      <label>Bookingnr.<span class="hint">valgfri</span></label>
-      <input type="text" id="f-booking" placeholder="fx 245420" autocomplete="off">
+      <label><span data-i18n="label_booking">Bookingnr.</span><span class="hint" data-i18n="hint_optional">valgfri</span></label>
+      <input type="text" id="f-booking" placeholder="fx 245420" data-i18n-placeholder="ph_booking" autocomplete="off">
     </div>
     <div class="field">
-      <label>Dato<span class="req">*</span></label>
+      <label><span data-i18n="label_date">Dato</span><span class="req">*</span></label>
       <input type="date" id="f-date">
     </div>
     <div class="row-2">
       <div class="field">
-        <label>Forbrug<span class="req">*</span><span class="hint">liter</span></label>
+        <label><span data-i18n="label_used">Forbrug</span><span class="req">*</span><span class="hint" data-i18n="unit_liter">liter</span></label>
         <input type="number" id="f-used" placeholder="0" min="0" step="0.1">
-        <div class="field-err" id="ferr-used">Angiv antal liter</div>
+        <div class="field-err" id="ferr-used" data-i18n="err_used">Angiv antal liter</div>
       </div>
       <div class="field">
-        <label>Rest i tanken<span class="hint">liter</span></label>
+        <label><span data-i18n="label_rest">Rest i tanken</span><span class="hint" data-i18n="unit_liter">liter</span></label>
         <input type="number" id="f-rest" placeholder="0" min="0" step="0.1">
       </div>
     </div>
     <div class="field">
-      <label>Timetæller<span class="hint">timer</span></label>
+      <label><span data-i18n="label_hours">Timetæller</span><span class="hint" data-i18n="unit_hours">timer</span></label>
       <input type="number" id="f-hours" placeholder="0" min="0" step="0.1">
     </div>
     <div class="field">
-      <label>Bemærkning<span class="hint">valgfri</span></label>
-      <input type="text" id="f-note" placeholder="fx direkte til booking 245420, tanket ved Q8 Køge">
+      <label><span data-i18n="label_note">Bemærkning</span><span class="hint" data-i18n="hint_optional">valgfri</span></label>
+      <input type="text" id="f-note" placeholder="fx direkte til booking 245420, tanket ved Q8 Køge" data-i18n-placeholder="ph_note_reg">
     </div>
     <div class="field">
-      <label>Foto<span class="hint">valgfri</span></label>
+      <label><span data-i18n="label_photo">Foto</span><span class="hint" data-i18n="hint_optional">valgfri</span></label>
       <label class="photo-upload-btn" for="f-photo">
-        <span id="photo-label">📷 Vedhæft foto</span>
+        <span id="photo-label" data-i18n="btn_photo">📷 Vedhæft foto</span>
       </label>
       <input type="file" id="f-photo" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelect(this)">
       <div id="photo-preview-wrap" style="display:none; margin-top:8px;">
         <img id="photo-preview" style="width:100%; border-radius:8px; border:1.5px solid var(--dark-beige);" />
-        <button type="button" onclick="clearPhoto()" style="margin-top:6px; font-size:11px; font-weight:700; font-family:var(--font); background:none; border:1.5px solid var(--dark-beige); border-radius:6px; padding:4px 12px; color:var(--text-body); cursor:pointer;">Fjern foto</button>
+        <button type="button" onclick="clearPhoto()" style="margin-top:6px; font-size:11px; font-weight:700; font-family:var(--font); background:none; border:1.5px solid var(--dark-beige); border-radius:6px; padding:4px 12px; color:var(--text-body); cursor:pointer;" data-i18n="btn_photo_remove">Fjern foto</button>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="submitForm()">Gem registrering</button>
+    <button class="btn btn-primary" onclick="submitForm()" data-i18n="btn_submit">Gem registrering</button>
   </div>
 </div>
 
 <!-- ── OVERSIGT ── -->
 <div class="view" id="view-oversigt">
   <div style="display:flex;gap:6px;margin-bottom:12px;">
-    <button class="filter-btn active" id="filter-all"    onclick="setFilter('all')">Alle</button>
-    <button class="filter-btn"        id="filter-week"   onclick="setFilter('week')">Denne uge</button>
-    <button class="filter-btn"        id="filter-month"  onclick="setFilter('month')">Denne måned</button>
+    <button class="filter-btn active" id="filter-all"    onclick="setFilter('all')" data-i18n="filter_all">Alle</button>
+    <button class="filter-btn"        id="filter-week"   onclick="setFilter('week')" data-i18n="filter_week">Denne uge</button>
+    <button class="filter-btn"        id="filter-month"  onclick="setFilter('month')" data-i18n="filter_month">Denne måned</button>
   </div>
   <div class="search-bar">
-    <input type="text" id="search" placeholder="Søg booking, generator..." oninput="renderOversigt()">
-    <button class="btn-csv" onclick="exportCSV()">CSV ↓</button>
+    <input type="text" id="search" placeholder="Søg booking, generator..." data-i18n-placeholder="search_placeholder" oninput="renderOversigt()">
+    <button class="btn-csv" onclick="exportCSV()" data-i18n="btn_csv">CSV ↓</button>
   </div>
   <div id="oversigt-content"></div>
 </div>
@@ -215,60 +225,60 @@
 <!-- ── ANMOD ── -->
 <div class="view" id="view-anmod">
   <div class="card">
-    <div class="card-title">Opret anmodning til afdeling</div>
+    <div class="card-title" data-i18n="anmod_title">Opret anmodning til afdeling</div>
 
     <div class="field">
-      <label>Generator / Tank nr.<span class="req">*</span></label>
-      <input type="text" id="a-unit" placeholder="fx EL6219" autocomplete="off">
-      <div class="field-err" id="aerr-unit">Angiv generator- eller tanknummer</div>
+      <label><span data-i18n="label_unit">Generator / Tank nr.</span><span class="req">*</span></label>
+      <input type="text" id="a-unit" placeholder="fx EL6219" data-i18n-placeholder="ph_unit" autocomplete="off">
+      <div class="field-err" id="aerr-unit" data-i18n="err_unit">Angiv generator- eller tanknummer</div>
     </div>
     <div class="field">
-      <label>Bookingnr.<span class="req">*</span></label>
-      <input type="text" id="a-booking" placeholder="fx 245420" autocomplete="off">
-      <div class="field-err" id="aerr-booking">Angiv bookingnummer</div>
+      <label><span data-i18n="label_booking">Bookingnr.</span><span class="req">*</span></label>
+      <input type="text" id="a-booking" placeholder="fx 245420" data-i18n-placeholder="ph_booking" autocomplete="off">
+      <div class="field-err" id="aerr-booking" data-i18n="err_booking_anmod">Angiv bookingnummer</div>
     </div>
     <div class="field">
-      <label>Afdeling<span class="req">*</span></label>
+      <label><span data-i18n="label_dept">Afdeling</span><span class="req">*</span></label>
       <select id="a-dept">
-        <option value="">– Vælg afdeling –</option>
+        <option value="" data-i18n="select_dept_placeholder">– Vælg afdeling –</option>
         <option value="east.transport.dk@godik.dk">Hedehusene (east.transport)</option>
         <option value="north.transport.dk@godik.dk">Brovst (north.transport)</option>
         <option value="chaplyhina.anastasiia@gmail.com">Test (gmail)</option>
       </select>
-      <div class="field-err" id="aerr-dept">Vælg en afdeling</div>
+      <div class="field-err" id="aerr-dept" data-i18n="err_dept">Vælg en afdeling</div>
     </div>
     <div class="field">
-      <label>Bemærkning<span class="hint">valgfri</span></label>
-      <input type="text" id="a-note" placeholder="fx hastelevering, aftalt med kunde">
+      <label><span data-i18n="label_note">Bemærkning</span><span class="hint" data-i18n="hint_optional">valgfri</span></label>
+      <input type="text" id="a-note" placeholder="fx hastelevering, aftalt med kunde" data-i18n-placeholder="ph_note_anmod">
     </div>
-    <button class="btn btn-anmod" onclick="sendAnmod()">Send anmodning</button>
+    <button class="btn btn-anmod" onclick="sendAnmod()" data-i18n="btn_send_anmod">Send anmodning</button>
   </div>
 
-  <div class="hint-text">Sender automatisk besked til afdelingen</div>
+  <div class="hint-text" data-i18n="hint_auto_send">Sender automatisk besked til afdelingen</div>
 
   <div class="card" id="pris-card">
-    <div class="card-title">Dagens pris – Entreprenør Diesel</div>
+    <div class="card-title" data-i18n="pris_card_title">Dagens pris – Entreprenør Diesel</div>
     <div class="field" style="margin-bottom:10px;">
-      <label>Q8 listepris<span class="hint">kr/liter, uden rabat</span></label>
-      <input type="number" id="dagens-pris" placeholder="fx 8.75" step="0.01" min="0" oninput="updatePrisPreview()">
+      <label><span data-i18n="label_listepris">Q8 listepris</span><span class="hint" data-i18n="hint_listepris">kr/liter, uden rabat</span></label>
+      <input type="number" id="dagens-pris" placeholder="fx 8.75" data-i18n-placeholder="ph_listepris" step="0.01" min="0" oninput="updatePrisPreview()">
     </div>
     <div id="pris-preview" style="display:none;background:var(--beige);border-radius:8px;padding:12px;margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text-body);">Q8 LISTEPRIS</span>
+        <span style="font-size:11px;font-weight:700;color:var(--text-body);" data-i18n="preview_listepris">Q8 LISTEPRIS</span>
         <span style="font-size:14px;font-weight:800;color:var(--dark-green);" id="preview-list">–</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text-body);">RABAT</span>
+        <span style="font-size:11px;font-weight:700;color:var(--text-body);" data-i18n="preview_rabat">RABAT</span>
         <span style="font-size:14px;font-weight:800;color:var(--red);">–0,30 kr/l</span>
       </div>
       <div style="border-top:1.5px solid var(--dark-beige);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;font-weight:700;color:var(--dark-green);">PRIS EFTER RABAT</span>
+        <span style="font-size:11px;font-weight:700;color:var(--dark-green);" data-i18n="preview_final">PRIS EFTER RABAT</span>
         <span style="font-size:18px;font-weight:900;color:var(--green);" id="preview-final">–</span>
       </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
-      <button class="btn btn-anmod" style="flex:1;" onclick="saveDagensPris()">Gem pris</button>
-      <button onclick="openPrisHistorik()" style="background:none;border:1.5px solid var(--dark-beige);border-radius:8px;padding:12px 16px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;white-space:nowrap;font-family:var(--font);">📈 Prishistorik</button>
+      <button class="btn btn-anmod" style="flex:1;" onclick="saveDagensPris()" data-i18n="btn_save_price">Gem pris</button>
+      <button onclick="openPrisHistorik()" style="background:none;border:1.5px solid var(--dark-beige);border-radius:8px;padding:12px 16px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;white-space:nowrap;font-family:var(--font);" data-i18n="btn_price_history">📈 Prishistorik</button>
     </div>
     <div id="pris-status" style="font-size:12px;color:var(--green);font-weight:700;margin-top:8px;display:none;"></div>
   </div>
@@ -277,6 +287,333 @@
 <div id="toast"></div>
 
 <script>
+const translations = {
+  da: {
+    app_title: "Diesel Registrering",
+    header_subtitle: "Generatorservice · Power",
+    tab_registrer: "Registrer",
+    tab_oversigt: "Oversigt",
+    tab_anmod: "Anmod",
+
+    reg_title: "Udfyld oplysninger – B3-Blanket",
+    label_unit: "Generator / Tank nr.",
+    ph_unit: "fx EL6219",
+    err_unit: "Angiv generator- eller tanknummer",
+    label_booking: "Bookingnr.",
+    ph_booking: "fx 245420",
+    hint_optional: "valgfri",
+    label_date: "Dato",
+    label_used: "Forbrug",
+    unit_liter: "liter",
+    err_used: "Angiv antal liter",
+    label_rest: "Rest i tanken",
+    label_hours: "Timetæller",
+    unit_hours: "timer",
+    label_note: "Bemærkning",
+    ph_note_reg: "fx direkte til booking 245420, tanket ved Q8 Køge",
+    label_photo: "Foto",
+    btn_photo: "📷 Vedhæft foto",
+    btn_photo_remove: "Fjern foto",
+    btn_submit: "Gem registrering",
+    btn_submit_loading: "Gemmer...",
+
+    filter_all: "Alle",
+    filter_week: "Denne uge",
+    filter_month: "Denne måned",
+    search_placeholder: "Søg booking, generator...",
+    btn_csv: "CSV ↓",
+    section_waiting: "Afventer oplysninger",
+    section_done: "Udfyldt",
+    empty_waiting: "Ingen ventende anmodninger",
+    empty_done: "Ingen registreringer endnu",
+    empty_error: "Kunne ikke hente data",
+    loading_data: "Henter data...",
+    status_waiting: "Afventer",
+    status_done: "Udfyldt",
+    tag_forbrug: "L forbrug",
+    tag_rest: "L rest",
+    tag_hours: "t",
+    tap_to_fill: "Tryk for at udfylde →",
+    created_at: "Oprettet",
+    filled_from_request: "Udfyldt fra anmodning",
+    see_photo: "Se foto",
+    price_per_liter_label: "PRIS PR. LITER:",
+    btn_delete: "Slet",
+    btn_mark_done: "Markér udfyldt",
+    booking_label: "Booking",
+    summary_registrations: "Registreringer",
+    summary_total_consumption: "Total forbrug",
+    summary_avg_price: "Gns. pris/liter",
+    summary_waiting: "Afventer",
+
+    anmod_title: "Opret anmodning til afdeling",
+    label_dept: "Afdeling",
+    select_dept_placeholder: "– Vælg afdeling –",
+    err_dept: "Vælg en afdeling",
+    err_booking_anmod: "Angiv bookingnummer",
+    ph_note_anmod: "fx hastelevering, aftalt med kunde",
+    btn_send_anmod: "Send anmodning",
+    btn_sending: "Sender...",
+    hint_auto_send: "Sender automatisk besked til afdelingen",
+    pris_card_title: "Dagens pris – Entreprenør Diesel",
+    label_listepris: "Q8 listepris",
+    hint_listepris: "kr/liter, uden rabat",
+    ph_listepris: "fx 8.75",
+    preview_listepris: "Q8 LISTEPRIS",
+    preview_rabat: "RABAT",
+    preview_final: "PRIS EFTER RABAT",
+    btn_save_price: "Gem pris",
+    btn_price_history: "📈 Prishistorik",
+
+    historik_title: "Prishistorik – Entreprenør Diesel",
+    chart_label_after_rabat: "Pris efter rabat (kr/l)",
+    chart_label_listepris: "Q8 listepris (kr/l)",
+    latest_prices: "Seneste priser",
+    no_price_data: "Ingen prisdata endnu",
+    status_today_price: "Dagens pris",
+    status_saved_price: "Gemt",
+
+    toast_fill_required: "Udfyld de påkrævede felter",
+    toast_saved: "✓ Registrering gemt",
+    toast_registered_and_marked: "✓ Data registreret – booking markeret som udfyldt",
+    toast_save_error: "Fejl ved gemning – prøv igen",
+    toast_email_sent: "✓ Email sendt til",
+    toast_marked_done: "Markeret som udfyldt",
+    toast_deleted: "Slettet",
+    toast_no_export_data: "Ingen data at eksportere",
+    toast_csv_downloaded: "CSV downloadet",
+    toast_price_save_error: "Fejl ved gemning af pris",
+    toast_invalid_price: "Ugyldig pris",
+    toast_send_error: "Fejl ved afsendelse – prøv igen",
+    toast_photo_error: "Udfyld de påkrævede felter",
+  },
+
+  en: {
+    app_title: "Diesel Registration",
+    header_subtitle: "Generator Service · Power",
+    tab_registrer: "Register",
+    tab_oversigt: "Overview",
+    tab_anmod: "Request",
+
+    reg_title: "Fill in details – B3 Form",
+    label_unit: "Generator / Tank no.",
+    ph_unit: "e.g. EL6219",
+    err_unit: "Enter generator or tank number",
+    label_booking: "Booking no.",
+    ph_booking: "e.g. 245420",
+    hint_optional: "optional",
+    label_date: "Date",
+    label_used: "Consumption",
+    unit_liter: "liters",
+    err_used: "Enter number of liters",
+    label_rest: "Remaining in tank",
+    label_hours: "Hour meter",
+    unit_hours: "hours",
+    label_note: "Note",
+    ph_note_reg: "e.g. straight to booking 245420, refueled at Q8 Køge",
+    label_photo: "Photo",
+    btn_photo: "📷 Attach photo",
+    btn_photo_remove: "Remove photo",
+    btn_submit: "Save registration",
+    btn_submit_loading: "Saving...",
+
+    filter_all: "All",
+    filter_week: "This week",
+    filter_month: "This month",
+    search_placeholder: "Search booking, generator...",
+    btn_csv: "CSV ↓",
+    section_waiting: "Awaiting information",
+    section_done: "Completed",
+    empty_waiting: "No pending requests",
+    empty_done: "No registrations yet",
+    empty_error: "Could not load data",
+    loading_data: "Loading data...",
+    status_waiting: "Pending",
+    status_done: "Completed",
+    tag_forbrug: "L used",
+    tag_rest: "L remaining",
+    tag_hours: "h",
+    tap_to_fill: "Tap to fill in →",
+    created_at: "Created",
+    filled_from_request: "Filled from request",
+    see_photo: "See photo",
+    price_per_liter_label: "PRICE PER LITER:",
+    btn_delete: "Delete",
+    btn_mark_done: "Mark completed",
+    booking_label: "Booking",
+    summary_registrations: "Registrations",
+    summary_total_consumption: "Total consumption",
+    summary_avg_price: "Avg. price/liter",
+    summary_waiting: "Pending",
+
+    anmod_title: "Create request to department",
+    label_dept: "Department",
+    select_dept_placeholder: "– Select department –",
+    err_dept: "Select a department",
+    err_booking_anmod: "Enter booking number",
+    ph_note_anmod: "e.g. urgent delivery, agreed with customer",
+    btn_send_anmod: "Send request",
+    btn_sending: "Sending...",
+    hint_auto_send: "Automatically sends a message to the department",
+    pris_card_title: "Today's price – Entrepreneur Diesel",
+    label_listepris: "Q8 list price",
+    hint_listepris: "kr/liter, before discount",
+    ph_listepris: "e.g. 8.75",
+    preview_listepris: "Q8 LIST PRICE",
+    preview_rabat: "DISCOUNT",
+    preview_final: "PRICE AFTER DISCOUNT",
+    btn_save_price: "Save price",
+    btn_price_history: "📈 Price history",
+
+    historik_title: "Price history – Entrepreneur Diesel",
+    chart_label_after_rabat: "Price after discount (kr/l)",
+    chart_label_listepris: "Q8 list price (kr/l)",
+    latest_prices: "Latest prices",
+    no_price_data: "No price data yet",
+    status_today_price: "Today's price",
+    status_saved_price: "Saved",
+
+    toast_fill_required: "Please fill in the required fields",
+    toast_saved: "✓ Registration saved",
+    toast_registered_and_marked: "✓ Data registered – booking marked as completed",
+    toast_save_error: "Error saving – please try again",
+    toast_email_sent: "✓ Email sent to",
+    toast_marked_done: "Marked as completed",
+    toast_deleted: "Deleted",
+    toast_no_export_data: "No data to export",
+    toast_csv_downloaded: "CSV downloaded",
+    toast_price_save_error: "Error saving price",
+    toast_invalid_price: "Invalid price",
+    toast_send_error: "Error sending – please try again",
+    toast_photo_error: "Please fill in the required fields",
+  },
+
+  pl: {
+    app_title: "Rejestracja Diesla",
+    header_subtitle: "Serwis Generatorów · Power",
+    tab_registrer: "Rejestruj",
+    tab_oversigt: "Przegląd",
+    tab_anmod: "Zgłoszenie",
+
+    reg_title: "Uzupełnij dane – Formularz B3",
+    label_unit: "Nr generatora / zbiornika",
+    ph_unit: "np. EL6219",
+    err_unit: "Podaj numer generatora lub zbiornika",
+    label_booking: "Nr rezerwacji",
+    ph_booking: "np. 245420",
+    hint_optional: "opcjonalnie",
+    label_date: "Data",
+    label_used: "Zużycie",
+    unit_liter: "litrów",
+    err_used: "Podaj liczbę litrów",
+    label_rest: "Pozostało w zbiorniku",
+    label_hours: "Licznik godzin",
+    unit_hours: "godzin",
+    label_note: "Uwaga",
+    ph_note_reg: "np. bezpośrednio do rezerwacji 245420, tankowano na Q8 Køge",
+    label_photo: "Zdjęcie",
+    btn_photo: "📷 Dodaj zdjęcie",
+    btn_photo_remove: "Usuń zdjęcie",
+    btn_submit: "Zapisz rejestrację",
+    btn_submit_loading: "Zapisywanie...",
+
+    filter_all: "Wszystkie",
+    filter_week: "Ten tydzień",
+    filter_month: "Ten miesiąc",
+    search_placeholder: "Szukaj rezerwacji, generatora...",
+    btn_csv: "CSV ↓",
+    section_waiting: "Oczekujące dane",
+    section_done: "Zakończone",
+    empty_waiting: "Brak oczekujących zgłoszeń",
+    empty_done: "Brak rejestracji",
+    empty_error: "Nie udało się pobrać danych",
+    loading_data: "Pobieranie danych...",
+    status_waiting: "Oczekuje",
+    status_done: "Zakończone",
+    tag_forbrug: "L zużyto",
+    tag_rest: "L pozostało",
+    tag_hours: "godz.",
+    tap_to_fill: "Kliknij, aby uzupełnić →",
+    created_at: "Utworzono",
+    filled_from_request: "Uzupełnione ze zgłoszenia",
+    see_photo: "Zobacz zdjęcie",
+    price_per_liter_label: "CENA ZA LITR:",
+    btn_delete: "Usuń",
+    btn_mark_done: "Oznacz jako zakończone",
+    booking_label: "Rezerwacja",
+    summary_registrations: "Rejestracje",
+    summary_total_consumption: "Łączne zużycie",
+    summary_avg_price: "Śr. cena/litr",
+    summary_waiting: "Oczekujące",
+
+    anmod_title: "Utwórz zgłoszenie do działu",
+    label_dept: "Dział",
+    select_dept_placeholder: "– Wybierz dział –",
+    err_dept: "Wybierz dział",
+    err_booking_anmod: "Podaj numer rezerwacji",
+    ph_note_anmod: "np. pilna dostawa, uzgodnione z klientem",
+    btn_send_anmod: "Wyślij zgłoszenie",
+    btn_sending: "Wysyłanie...",
+    hint_auto_send: "Automatycznie wysyła wiadomość do działu",
+    pris_card_title: "Dzisiejsza cena – Diesel Entreprenør",
+    label_listepris: "Cena katalogowa Q8",
+    hint_listepris: "kr/litr, bez rabatu",
+    ph_listepris: "np. 8.75",
+    preview_listepris: "CENA KATALOGOWA Q8",
+    preview_rabat: "RABAT",
+    preview_final: "CENA PO RABACIE",
+    btn_save_price: "Zapisz cenę",
+    btn_price_history: "📈 Historia cen",
+
+    historik_title: "Historia cen – Diesel Entreprenør",
+    chart_label_after_rabat: "Cena po rabacie (kr/l)",
+    chart_label_listepris: "Cena katalogowa Q8 (kr/l)",
+    latest_prices: "Ostatnie ceny",
+    no_price_data: "Brak jeszcze danych o cenach",
+    status_today_price: "Dzisiejsza cena",
+    status_saved_price: "Zapisano",
+
+    toast_fill_required: "Uzupełnij wymagane pola",
+    toast_saved: "✓ Rejestracja zapisana",
+    toast_registered_and_marked: "✓ Dane zarejestrowane – rezerwacja oznaczona jako zakończona",
+    toast_save_error: "Błąd zapisu – spróbuj ponownie",
+    toast_email_sent: "✓ E-mail wysłany do",
+    toast_marked_done: "Oznaczono jako zakończone",
+    toast_deleted: "Usunięto",
+    toast_no_export_data: "Brak danych do eksportu",
+    toast_csv_downloaded: "CSV pobrany",
+    toast_price_save_error: "Błąd zapisu ceny",
+    toast_invalid_price: "Nieprawidłowa cena",
+    toast_send_error: "Błąd wysyłania – spróbuj ponownie",
+    toast_photo_error: "Uzupełnij wymagane pola",
+  },
+};
+
+let currentLang = 'da';
+try { currentLang = localStorage.getItem('godik_lang') || 'da'; } catch(e) { console.warn('localStorage unavailable'); }
+function t(key) {
+  return (translations[currentLang] && translations[currentLang][key]) || translations.da[key] || key;
+}
+
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.documentElement.lang = currentLang;
+}
+
+function setLanguage(lang) {
+  currentLang = lang;
+  try { localStorage.setItem('godik_lang', lang); } catch(e) {}
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  applyStaticTranslations();
+  const oversigtActive = document.getElementById('view-oversigt').classList.contains('active');
+  if (oversigtActive) renderOversigt();
+}
+
 const APP_URL   = 'https://bit.ly/godik-diesel-el6219';
 const SB_URL    = 'https://wfggcslxcxguxhbodxdb.supabase.co';
 const SB_KEY    = 'sb_publishable_cLRfLHzlTpKAuFq_BKf1sA_IxAysueU';
@@ -367,6 +704,10 @@ function switchTab(name){
 // Set today
 document.getElementById('f-date').value = todayISO();
 
+// Apply saved language on load
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+applyStaticTranslations();
+
 // Check URL params (pre-filled from anmod link)
 (function prefill(){
   const p = new URLSearchParams(window.location.search);
@@ -403,7 +744,7 @@ async function loadDagensPris() {
       document.getElementById('dagens-pris').value = listepris.toFixed(2);
       updatePrisPreview();
       const el = document.getElementById('pris-status');
-      el.textContent = `✓ Dagens pris: ${listepris.toFixed(2)} – 0,30 = ${Number(r.price).toFixed(2)} kr/l`;
+      el.textContent = `✓ ${t('status_today_price')}: ${listepris.toFixed(2)} – 0,30 = ${Number(r.price).toFixed(2)} kr/l`;
       el.style.display = 'block';
     }
   } catch(e) { console.warn('Could not load price:', e); }
@@ -411,7 +752,7 @@ async function loadDagensPris() {
 
 async function saveDagensPris() {
   const listepris = parseFloat(document.getElementById('dagens-pris').value);
-  if(!listepris || listepris <= 0) { toast('Angiv en gyldig pris', true); return; }
+  if(!listepris || listepris <= 0) { toast(t('toast_invalid_price'), true); return; }
   const afterRabat = Math.round((listepris - 0.30) * 100) / 100;
   try {
     await fetch(`${SB_URL}/rest/v1/diesel_prices`, {
@@ -420,20 +761,20 @@ async function saveDagensPris() {
       body: JSON.stringify({ date: todayISO(), price: afterRabat, listepris: listepris })
     });
     const el = document.getElementById('pris-status');
-    el.textContent = `✓ Gemt: ${listepris.toFixed(2)} kr/l – 0,30 = ${afterRabat.toFixed(2)} kr/l`;
+    el.textContent = `✓ ${t('status_saved_price')}: ${listepris.toFixed(2)} kr/l – 0,30 = ${afterRabat.toFixed(2)} kr/l`;
     el.style.display = 'block';
     toast(`✓ Pris gemt: ${afterRabat.toFixed(2)} kr/l`);
-  } catch(e) { toast('Fejl ved gemning af pris', true); }
+  } catch(e) { toast(t('toast_price_save_error'), true); }
 }
 
 async function editPris(recordId, currentPris) {
   const val = prompt('Indtast pris pr. liter (kr):', currentPris || '');
   if(val === null) return;
   const num = parseFloat(val.replace(',','.'));
-  if(isNaN(num) || num <= 0) { toast('Ugyldig pris', true); return; }
+  if(isNaN(num) || num <= 0) { toast(t('toast_invalid_price'), true); return; }
   await sbUpdate(recordId, { price_per_liter: num });
   renderOversigt();
-  toast(`✓ Pris opdateret: ${num.toFixed(2)} kr/l`);
+  toast(`✓ ${num.toFixed(2)} kr/l`);
 }
 
 // ── PHOTO HELPERS ──
@@ -482,13 +823,13 @@ async function uploadPhoto(file, recordId) {
 async function submitForm(){
   const ok1=chk('f-unit',   'ferr-unit',    v=>v.trim().length>0);
   const ok3=chk('f-used',   'ferr-used',    v=>v!==''&&parseFloat(v)>=0);
-  if(!ok1||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
+  if(!ok1||!ok3){ toast(t('toast_fill_required'), true); return; }
 
   const unit    = document.getElementById('f-unit').value.trim();
   const booking = document.getElementById('f-booking').value.trim();
 
   const btn = document.querySelector('.btn-primary');
-  btn.disabled = true; btn.textContent = 'Gemmer...';
+  btn.disabled = true; btn.textContent = t('btn_submit_loading');
 
   try {
     // Find matching pending anmod — either from direct click or by unit/booking match
@@ -568,16 +909,16 @@ async function submitForm(){
 
     if(pending) {
       // Came from Afventer — go back to Oversigt with success message
-      toast('✓ Data registreret – booking markeret som udfyldt');
+      toast(t('toast_registered_and_marked'));
       setTimeout(() => switchTab('oversigt'), 1200);
     } else {
-      toast('✓ Registrering gemt');
+      toast(t('toast_saved'));
     }
   } catch(e) {
     console.error(e);
-    toast('Fejl ved gemning – prøv igen', true);
+    toast(t('toast_save_error'), true);
   } finally {
-    btn.disabled = false; btn.textContent = 'Gem registrering';
+    btn.disabled = false; btn.textContent = t('btn_submit');
   }
 }
 
@@ -586,7 +927,7 @@ async function sendAnmod(){
   const ok1=chk('a-unit',   'aerr-unit',    v=>v.trim().length>0);
   const ok2=chk('a-booking','aerr-booking', v=>v.trim().length>0);
   const ok3=chk('a-dept',   'aerr-dept',    v=>v.length>0);
-  if(!ok1||!ok2||!ok3){ toast('Udfyld de påkrævede felter', true); return; }
+  if(!ok1||!ok2||!ok3){ toast(t('toast_fill_required'), true); return; }
 
   const unit    = document.getElementById('a-unit').value.trim();
   const booking = document.getElementById('a-booking').value.trim();
@@ -618,7 +959,7 @@ async function sendAnmod(){
 
   const btn = document.querySelector('.btn-anmod');
   btn.disabled = true;
-  btn.textContent = 'Sender...';
+  btn.textContent = t('btn_sending');
 
   try {
     await emailjs.send('service_e3uxna4', 'template_ti9sr7o', {
@@ -632,22 +973,22 @@ async function sendAnmod(){
     ['a-unit','a-booking','a-note'].forEach(id=>{ document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
     document.getElementById('a-dept').value='';
     document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
-    toast('✓ Email sendt til ' + deptName(dept));
+    toast(t('toast_email_sent') + ' ' + deptName(dept));
     switchTab('oversigt');
   } catch(err) {
     console.error(err);
-    toast('Fejl ved afsendelse – prøv igen', true);
+    toast(t('toast_send_error'), true);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Send anmodning';
+    btn.textContent = t('btn_send_anmod');
   }
 }
 
 // ── RENDER OVERSIGT ──
 async function renderOversigt(){
-  document.getElementById('oversigt-content').innerHTML = '<div class="empty"><div class="ico">⏳</div>Henter data...</div>';
+  document.getElementById('oversigt-content').innerHTML = `<div class="empty"><div class="ico">⏳</div>${t('loading_data')}</div>`;
   let all;
-  try { all = await sbGet(); } catch(e) { document.getElementById('oversigt-content').innerHTML = '<div class="empty"><div class="ico">⚠️</div>Kunne ikke hente data</div>'; return; }
+  try { all = await sbGet(); } catch(e) { document.getElementById('oversigt-content').innerHTML = `<div class="empty"><div class="ico">⚠️</div>${t('empty_error')}</div>`; return; }
 
   const q = (document.getElementById('search').value||'').toLowerCase();
   const filter = r => {
@@ -667,60 +1008,60 @@ async function renderOversigt(){
   let html = '';
 
   // Waiting section
-  html += `<div class="section-label">Afventer oplysninger <span class="badge badge-wait">${waitingAll.length}</span></div>`;
+  html += `<div class="section-label">${t('section_waiting')} <span class="badge badge-wait">${waitingAll.length}</span></div>`;
   html += `<div style="display:flex;gap:6px;margin-bottom:10px;">
-    <button class="filter-btn ${deptFilter==='all'?'active':''}" onclick="setDeptFilter('all')">Alle</button>
+    <button class="filter-btn ${deptFilter==='all'?'active':''}" onclick="setDeptFilter('all')">${t('filter_all')}</button>
     <button class="filter-btn ${deptFilter==='Hedehusene'?'active':''}" onclick="setDeptFilter('Hedehusene')">Hedehusene</button>
     <button class="filter-btn ${deptFilter==='Brovst'?'active':''}" onclick="setDeptFilter('Brovst')">Brovst</button>
   </div>`;
   if(!waiting.length){
-    html += `<div class="empty"><div class="ico">✅</div>Ingen ventende anmodninger</div>`;
+    html += `<div class="empty"><div class="ico">✅</div>${t('empty_waiting')}</div>`;
   } else {
     html += waiting.map(r=>`
       <div class="rec waiting" style="cursor:pointer;" onclick="fillFromAnmod('${r.unit}','${r.booking||''}','${r.id}')">
         <div class="rec-top">
-          <div class="rec-booking">Booking: ${r.booking||'–'}</div>
-          <span class="status-pill pill-wait">Afventer</span>
+          <div class="rec-booking">${t('booking_label')}: ${r.booking||'–'}</div>
+          <span class="status-pill pill-wait">${t('status_waiting')}</span>
         </div>
         <div class="rec-tags">
           <span class="tag">⚙️ ${r.unit}</span>
           <span class="tag tag-dept">🏢 ${deptName(r.dept)}</span>
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">Oprettet ${fmtDate((r.created_at||'').split('T')[0])} · <span style="color:var(--green);font-weight:700;">Tryk for at udfylde →</span></div>
+        <div class="rec-meta">${t('created_at')} ${fmtDate((r.created_at||'').split('T')[0])} · <span style="color:var(--green);font-weight:700;">${t('tap_to_fill')}</span></div>
         <div class="rec-actions">
-          <button class="btn-sm" onclick="event.stopPropagation();deleteRec('${r.id}')">Slet</button>
-          <button class="btn-sm btn-sm-ok" onclick="event.stopPropagation();markDone('${r.id}')">Markér udfyldt</button>
+          <button class="btn-sm" onclick="event.stopPropagation();deleteRec('${r.id}')">${t('btn_delete')}</button>
+          <button class="btn-sm btn-sm-ok" onclick="event.stopPropagation();markDone('${r.id}')">${t('btn_mark_done')}</button>
         </div>
       </div>`).join('');
   }
 
   // Done section
-  html += `<div class="section-label" style="margin-top:20px;">Udfyldt <span class="badge badge-done">${done.length}</span></div>`;
+  html += `<div class="section-label" style="margin-top:20px;">${t('section_done')} <span class="badge badge-done">${done.length}</span></div>`;
   if(!done.length){
-    html += `<div class="empty"><div class="ico">📋</div>Ingen registreringer endnu</div>`;
+    html += `<div class="empty"><div class="ico">📋</div>${t('empty_done')}</div>`;
   } else {
     html += done.map(r=>`
       <div class="rec done">
         <div class="rec-top">
-          <div class="rec-booking">Booking: ${r.booking}</div>
-          <span class="status-pill pill-done">Udfyldt</span>
+          <div class="rec-booking">${t('booking_label')}: ${r.booking}</div>
+          <span class="status-pill pill-done">${t('status_done')}</span>
         </div>
         <div class="rec-tags">
           <span class="tag">⚙️ ${r.unit}</span>
-          <span class="tag tag-fuel">⛽ ${r.used} L forbrug</span>
-          ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest</span>`:''}
-          ${r.hours?`<span class="tag">⏱️ ${r.hours} t</span>`:''}
+          <span class="tag tag-fuel">⛽ ${r.used} ${t('tag_forbrug')}</span>
+          ${r.rest>0?`<span class="tag">🪣 ${r.rest} ${t('tag_rest')}</span>`:''}
+          ${r.hours?`<span class="tag">⏱️ ${r.hours} ${t('tag_hours')}</span>`:''}
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
-        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?` · <span class="photo-tag" onclick="openPhoto('${r.photo_url}')">📷 Se foto</span>`:''}</div>
+        <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · '+t('filled_from_request'):''}${r.photo_url?` · <span class="photo-tag" onclick="openPhoto('${r.photo_url}')">📷 ${t('see_photo')}</span>`:''}</div>
         <div class="pris-row" id="pris-${r.id}">
-          <span style="font-size:11px;color:var(--text-body);font-weight:600;">PRIS PR. LITER:</span>
+          <span style="font-size:11px;color:var(--text-body);font-weight:600;">${t('price_per_liter_label')}</span>
           <span class="pris-value" style="font-size:13px;font-weight:800;color:var(--dark-green);margin:0 6px;">${r.price_per_liter ? r.price_per_liter.toFixed(2)+' kr' : '–'}</span>
           <button class="btn-sm" style="font-size:10px;padding:3px 8px;" onclick="editPris('${r.id}', ${r.price_per_liter||0})">✏️</button>
         </div>
         <div class="rec-actions">
-          <button class="btn-sm" onclick="deleteRec('${r.id}')">Slet</button>
+          <button class="btn-sm" onclick="deleteRec('${r.id}')">${t('btn_delete')}</button>
         </div>
       </div>`).join('');
   }
@@ -732,19 +1073,19 @@ async function renderOversigt(){
 
   html += `<div style="background:var(--dark-green);border-radius:10px;padding:16px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div style="text-align:center;">
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Registreringer</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">${t('summary_registrations')}</div>
       <div style="font-size:22px;font-weight:900;color:var(--white);">${done.length}</div>
     </div>
     <div style="text-align:center;">
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Total forbrug</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">${t('summary_total_consumption')}</div>
       <div style="font-size:22px;font-weight:900;color:#008545;">${totalLiter.toFixed(0)} <span style="font-size:13px;">L</span></div>
     </div>
     <div style="text-align:center;">
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Gns. pris/liter</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">${t('summary_avg_price')}</div>
       <div style="font-size:22px;font-weight:900;color:var(--white);">${avgPrice ? avgPrice.toFixed(2)+' kr' : '–'}</div>
     </div>
     <div style="text-align:center;">
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Afventer</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">${t('summary_waiting')}</div>
       <div style="font-size:22px;font-weight:900;color:#E62B27;">${waitingAll.length}</div>
     </div>
   </div>`;
@@ -779,14 +1120,14 @@ async function markDone(id){
   }
 
   renderOversigt();
-  toast('Markeret som udfyldt');
+  toast(t('toast_marked_done'));
 }
 
 // ── DELETE ──
 async function deleteRec(id){
   await sbDelete(id);
   renderOversigt();
-  toast('Slettet');
+  toast(t('toast_deleted'));
 }
 
 // ── FILL FROM ANMOD ──
@@ -816,7 +1157,7 @@ async function openPrisHistorik() {
   try {
     const rows = await sbGet('&order=date.asc&limit=30', 'diesel_prices');
     if(!rows || !rows.length) {
-      document.getElementById('pris-table').innerHTML = '<div class="empty"><div class="ico">📊</div>Ingen prisdata endnu</div>';
+      document.getElementById('pris-table').innerHTML = `<div class="empty"><div class="ico">📊</div>${t('no_price_data')}</div>`;
       return;
     }
 
@@ -832,7 +1173,7 @@ async function openPrisHistorik() {
       data: {
         labels,
         datasets: [{
-          label: 'Pris efter rabat (kr/l)',
+          label: t('chart_label_after_rabat'),
           data,
           borderColor: '#008545',
           backgroundColor: 'rgba(0,133,69,0.08)',
@@ -842,7 +1183,7 @@ async function openPrisHistorik() {
           tension: 0.3,
           fill: true,
         },{
-          label: 'Q8 listepris (kr/l)',
+          label: t('chart_label_listepris'),
           data: listep,
           borderColor: '#E8EAE3',
           borderWidth: 1.5,
@@ -882,11 +1223,11 @@ async function openPrisHistorik() {
     }).join('');
 
     document.getElementById('pris-table').innerHTML = `
-      <div style="font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">Seneste priser</div>
+      <div style="font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">${t('latest_prices')}</div>
       <div style="border:1px solid var(--dark-beige);border-radius:8px;overflow:hidden;">${tableRows}</div>`;
 
   } catch(e) {
-    document.getElementById('pris-table').innerHTML = '<div class="empty">Kunne ikke hente data</div>';
+    document.getElementById('pris-table').innerHTML = `<div class="empty">${t('empty_error')}</div>`;
     console.error(e);
   }
 }
@@ -910,20 +1251,20 @@ function closePhoto() {
 async function exportCSV(){
   const all = await sbGet('&type=eq.record');
   const records = all || [];
-  if(!records.length){ toast('Ingen data at eksportere', true); return; }
+  if(!records.length){ toast(t('toast_no_export_data'), true); return; }
   const hdr = ['ID','Dato','Generator/Tank','Booking','Brugt (L)','Rest (L)','Bemærkning','Tidsstempel'];
   const rows = records.map(r=>[r.id,fmtDate(r.date),r.unit,r.booking,r.used,r.rest,r.note||'',r.ts]);
   const csv = [hdr,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
   a.download = `godik_diesel_${todayISO()}.csv`; a.click();
-  toast('CSV downloadet');
+  toast(t('toast_csv_downloaded'));
 }
 </script>
 <div id="pris-modal" onclick="closePrisHistorik()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;align-items:center;justify-content:center;padding:20px;">
   <div onclick="event.stopPropagation()" style="background:var(--white);width:100%;max-width:680px;border-radius:16px;padding:28px 24px;max-height:88dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;text-transform:uppercase;">Prishistorik – Entreprenør Diesel</div>
+      <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;text-transform:uppercase;" data-i18n="historik_title">Prishistorik – Entreprenør Diesel</div>
       <button onclick="closePrisHistorik()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--mid);line-height:1;">×</button>
     </div>
     <canvas id="pris-chart" style="width:100%;max-height:200px;margin-bottom:20px;"></canvas>
