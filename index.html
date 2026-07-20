@@ -318,10 +318,16 @@ function toast(msg, isErr=false){
 
 // ── DATE FILTER ──
 let activeFilter = 'all';
+let deptFilter = 'all';
 function setFilter(f) {
   activeFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('filter-'+f).classList.add('active');
+  renderOversigt();
+}
+
+function setDeptFilter(d) {
+  deptFilter = d;
   renderOversigt();
 }
 
@@ -649,13 +655,19 @@ async function renderOversigt(){
     return matchQ && matchDate;
   };
 
-  const waiting = all.filter(r=>r.type==='anmod' && r.status==='waiting' && filter(r));
+  const waitingAll = all.filter(r=>r.type==='anmod' && r.status==='waiting' && filter(r));
+  const waiting = deptFilter==='all' ? waitingAll : waitingAll.filter(r=>deptName(r.dept)===deptFilter);
   const done    = all.filter(r=>r.type==='record' && filter(r));
 
   let html = '';
 
   // Waiting section
-  html += `<div class="section-label">Afventer oplysninger <span class="badge badge-wait">${waiting.length}</span></div>`;
+  html += `<div class="section-label">Afventer oplysninger <span class="badge badge-wait">${waitingAll.length}</span></div>`;
+  html += `<div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button class="filter-btn ${deptFilter==='all'?'active':''}" onclick="setDeptFilter('all')">Alle</button>
+    <button class="filter-btn ${deptFilter==='Hedehusene'?'active':''}" onclick="setDeptFilter('Hedehusene')">Hedehusene</button>
+    <button class="filter-btn ${deptFilter==='Brovst'?'active':''}" onclick="setDeptFilter('Brovst')">Brovst</button>
+  </div>`;
   if(!waiting.length){
     html += `<div class="empty"><div class="ico">✅</div>Ingen ventende anmodninger</div>`;
   } else {
@@ -727,7 +739,7 @@ async function renderOversigt(){
     </div>
     <div style="text-align:center;">
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;">Afventer</div>
-      <div style="font-size:22px;font-weight:900;color:#E62B27;">${waiting.length}</div>
+      <div style="font-size:22px;font-weight:900;color:#E62B27;">${waitingAll.length}</div>
     </div>
   </div>`;
 
