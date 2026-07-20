@@ -176,6 +176,10 @@
       </div>
     </div>
     <div class="field">
+      <label>Timetæller<span class="hint">timer</span></label>
+      <input type="number" id="f-hours" placeholder="0" min="0" step="0.1">
+    </div>
+    <div class="field">
       <label>Bemærkning<span class="hint">valgfri</span></label>
       <input type="text" id="f-note" placeholder="fx direkte til booking 245420, tanket ved Q8 Køge">
     </div>
@@ -516,6 +520,7 @@ async function submitForm(){
       date:      document.getElementById('f-date').value || todayISO(),
       used:      parseFloat(document.getElementById('f-used').value)||0,
       rest:      parseFloat(document.getElementById('f-rest').value)||0,
+      hours:     document.getElementById('f-hours').value ? parseFloat(document.getElementById('f-hours').value) : null,
       note:      document.getElementById('f-note').value.trim() || null,
       linked_to: pending ? pending.id : null,
       photo_url: photoUrl,
@@ -525,7 +530,7 @@ async function submitForm(){
     if(pending) await sbUpdate(pending.id, { status: 'done' });
 
     clearPhoto();
-    ['f-unit','f-booking','f-used','f-rest','f-note'].forEach(id=>{
+    ['f-unit','f-booking','f-used','f-rest','f-hours','f-note'].forEach(id=>{
       const el=document.getElementById(id); el.value=''; el.classList.remove('err');
     });
     document.getElementById('f-date').value = todayISO();
@@ -705,6 +710,7 @@ async function renderOversigt(){
           <span class="tag">⚙️ ${r.unit}</span>
           <span class="tag tag-fuel">⛽ ${r.used} L forbrug</span>
           ${r.rest>0?`<span class="tag">🪣 ${r.rest} L rest</span>`:''}
+          ${r.hours?`<span class="tag">⏱️ ${r.hours} t</span>`:''}
           ${r.note?`<span class="tag">💬 ${r.note}</span>`:''}
         </div>
         <div class="rec-meta">${fmtDate(r.date)}${r.linked_to?' · Udfyldt fra anmodning':''}${r.photo_url?` · <span class="photo-tag" onclick="openPhoto('${r.photo_url}')">📷 Se foto</span>`:''}</div>
@@ -790,6 +796,7 @@ function fillFromAnmod(unit, booking, anmodId) {
   document.getElementById('f-date').value    = todayISO();
   document.getElementById('f-used').value    = '';
   document.getElementById('f-rest').value    = '';
+  document.getElementById('f-hours').value   = '';
   document.getElementById('f-note').value    = '';
   clearPhoto();
   window._pendingAnmodId = anmodId;
