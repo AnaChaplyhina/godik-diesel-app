@@ -241,9 +241,10 @@
       <label><span data-i18n="label_dept">Afdeling</span><span class="req">*</span></label>
       <select id="a-dept">
         <option value="" data-i18n="select_dept_placeholder">– Vælg afdeling –</option>
-        <option value="east.transport.dk@godik.dk">Hedehusene (east.transport)</option>
-        <option value="north.transport.dk@godik.dk">Brovst (north.transport)</option>
-        <option value="chaplyhina.anastasiia@gmail.com">Test (gmail)</option>
+        <option value="east.transport.dk@godik.dk">Hedehusene</option>
+        <option value="north.transport.dk@godik.dk">Brovst</option>
+        <option value="ejby-internal">Ejby</option>
+        <option value="chaplyhina.anastasiia@gmail.com">Test</option>
       </select>
       <div class="field-err" id="aerr-dept" data-i18n="err_dept">Vælg en afdeling</div>
     </div>
@@ -623,7 +624,7 @@ const SB_HEADERS = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Auth
 function uid()     { return 'R' + Date.now().toString(36).toUpperCase(); }
 function todayISO(){ return new Date().toISOString().split('T')[0]; }
 function fmtDate(d){ if(!d) return '–'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; }
-function deptName(email){ return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
+function deptName(email){ if(email==='ejby-internal') return 'Ejby'; return email.includes('east') ? 'Hedehusene' : email.includes('gmail') ? 'Test' : 'Brovst'; }
 
 async function sbGet(filter='', table='registrations') {
   const base = table==='registrations' ? '?order=created_at.desc' : '?select=*';
@@ -943,6 +944,16 @@ async function sendAnmod(){
   };
   await sbInsert(req);
 
+  // Ejby is Anastasiia's own location — no external email needed, just save and show it in Oversigt
+  if (dept === 'ejby-internal') {
+    ['a-unit','a-booking','a-note'].forEach(id=>{ document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
+    document.getElementById('a-dept').value='';
+    document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+    toast(t('toast_saved'));
+    switchTab('oversigt');
+    return;
+  }
+
   const link = `${APP_URL}?unit=${encodeURIComponent(unit)}&booking=${encodeURIComponent(booking)}`;
   // Generate QR as base64 so it's not blocked by email clients
   const qrApiUrl = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(link)}&choe=UTF-8`;
@@ -1013,6 +1024,7 @@ async function renderOversigt(){
     <button class="filter-btn ${deptFilter==='all'?'active':''}" onclick="setDeptFilter('all')">${t('filter_all')}</button>
     <button class="filter-btn ${deptFilter==='Hedehusene'?'active':''}" onclick="setDeptFilter('Hedehusene')">Hedehusene</button>
     <button class="filter-btn ${deptFilter==='Brovst'?'active':''}" onclick="setDeptFilter('Brovst')">Brovst</button>
+    <button class="filter-btn ${deptFilter==='Ejby'?'active':''}" onclick="setDeptFilter('Ejby')">Ejby</button>
   </div>`;
   if(!waiting.length){
     html += `<div class="empty"><div class="ico">✅</div>${t('empty_waiting')}</div>`;
